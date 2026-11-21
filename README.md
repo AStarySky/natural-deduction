@@ -388,6 +388,7 @@ Task.md                    第一阶段 CLI 验收说明（历史文档）
 
 ## 素材与许可
 
+- 项目代码：MIT License，详见 [`LICENSE`](LICENSE)；第三方字体、音效与习题资料保留各自许可。
 - 字体：Baloo 2、Nunito、Patrick Hand，均为 SIL Open Font License（`ui/fonts/OFL-*.txt`）。
 - 音效：Kenney Casino Audio / Interface Sounds 与 VSCO2 CE（CC0）；Formula Builder 键盘音为 eklee / qubodup 的 “Single Key Press Sounds”（CC-BY 3.0，署名见 `audio/sfx/CREDITS.md`）。全部授权文本见 `audio/licenses/`。
 - BGM：`audio/music/deduction_loop.ogg` 是本项目原创合成曲目，无第三方采样或旋律，详见 `audio/music/CREDITS.md`。

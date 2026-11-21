@@ -4,9 +4,9 @@
 
 | 项目 | 内容 |
 |---|---|
-| 姓名 | `[请填写]` |
-| 学号 | `[请填写]` |
-| 院系 | `[请填写]` |
+| 姓名 | 汤立祥 |
+| 学号 | 2500011419 |
+| 院系 | 物理学院 |
 | 项目名称 | Natural Deduction |
 | GitHub 仓库 | <https://github.com/AStarySky/natural-deduction> |
 | 在线演示 | <https://mountfujish.itch.io/natural-deduction> |
@@ -748,7 +748,7 @@ CURRICULUM RESULT: 1263 checks, 0 failed
 引用与复用的外部资源：见上节。
 ```
 
-> 提交前请把姓名、学号、院系替换为真实信息，并根据实际参与情况调整 AI 声明。
+> 姓名、学号、院系和 GitHub 链接已填写；AI 使用声明请根据实际参与情况确认或调整。
 
 ## 9. 评分点对应
 
