@@ -3,15 +3,12 @@
 一个用**拖拽卡片拼证明树**来学习自然演绎（Natural Deduction）的二维矢量解谜游戏。
 
 - 源码仓库：<https://github.com/AStarySky/natural-deduction>
-- 在线试玩：<https://mountfujish.itch.io/natural-deduction>
 
 - 引擎：Godot **4.7**（GDScript，`gl_compatibility` 渲染器）
 - 主场景：`res://ui/main.tscn`
 - 目标平台：桌面（Windows / macOS / Linux）
 - 逻辑核心与 UI 完全解耦，同一套规则语义同时驱动游戏与无头 CLI
 
-> `Task.md` 是最初「CLI 最小可运行单元」的验收记录，部分范围限制已不再适用。
-> 本文档以当前代码为准。
 
 ---
 
@@ -112,7 +109,7 @@ godot --path "D:/Godot/Natural Deduction"
 
 Windows 下建议使用 `Godot_v4.7.2-stable_win64_console.exe` 以便看到 stdout。
 
-桌面版默认以全屏启动（`window/size/mode=3`），逻辑分辨率仍是 1280×720；`F11` 切回 1280×720 窗口。Web 版的全屏由 itch 播放器按钮控制。
+桌面版默认以全屏启动（`window/size/mode=3`），逻辑分辨率仍是 1280×720；`F11` 切回 1280×720 窗口。Web 版可通过页面按钮或浏览器全屏。
 
 ### CLI（无头）
 
@@ -152,53 +149,6 @@ apply not_elim   <assumption> <proof> <proof>
 
 `validate` 默认要求根节点的自由假设集合为空（所有假设均已解除）。
 
-### Web 导出与 itch.io
-
-项目自带 `export_presets.cfg`（Web、单线程、排除测试/工具/截图）和 `tools/export_web.sh`。先安装 **4.7.2 Web export templates**，然后运行：
-
-```bash
-bash tools/export_web.sh
-```
-
-脚本会先 `--import` 最新资源，再导出到 `build/web/`，并把授权文件一起打包成 `build/NaturalDeduction-web.zip`。本地上传前测试：
-
-```bash
-cd build/web
-python -m http.server 8000
-# 打开 http://localhost:8000
-```
-
-itch.io 上传时：
-
-1. New project → Kind of project 选 **HTML**；
-2. 上传 `NaturalDeduction-web.zip`，勾选 **This file will be played in the browser**；
-3. Embed options 设 viewport **1280 × 720**，打开 fullscreen button；
-4. 单线程导出不需要 SharedArrayBuffer，**不要**勾 itch 的 SharedArrayBuffer support；
-5. 先保存为 Draft 测试，再 Publish。
-
-### 宣传物料
-
-`build/promo/` 内含：
-
-- `cover-630x500.png`：itch.io 封面（真实 RuleBlock / FormulaBlock 证明树 + 一组双层 ASSUME/SubASSUME 窗口（内部使用紫色 AssumptionBlock）、一组单层 ASSUME 窗口，压在白纸边缘的上层卡片，以及右上角手绘铅笔与贝塞尔箭头，两行 Natural Deduction）
-- `cover-1260x1000.png`：同一封面的标准高分辨率版本
-- `cover-2520x2000.png`：2× 渲染母版（打印/高 DPI 用）
-- `cover-2520x1418-16x9.png`、`cover-1920x1080.png`、`cover-1280x720.png`：从 2× 母版中心裁切的 16:9 横版版本
-- `background-paper-tile.png` / `background-sky-tile.png`：512×512 无缝页面背景砖，分别对应封面纸面和游戏画布的蓝色点阵；在 itch.io 的 Background image 里使用并设为平铺，不要把它们当 Cover 使用
-- `background-paper-tile-preview.png` / `background-sky-tile-preview.png`：2×2 平铺接缝预览
-- `01-title.png` … `06-new-rules.png`：1920×1080 实机截图
-- `nested-five.mp4`：五层 Assume 放大/还原路径的 22 秒演示视频（由 `tools/record_nested_five.gd` 生成）
-- `README.txt`：素材顺序与说明
-
-也打包好了：`build/NaturalDeduction-promo.zip`。
-
-重新生成（需要非无头渲染）：
-
-```bash
-godot --path . -s res://tools/make_promo_cover.gd
-godot --path . -s res://tools/make_promo_screens.gd
-```
-
 ---
 
 ## 测试
@@ -208,9 +158,9 @@ godot --path . -s res://tools/make_promo_screens.gd
 ```bash
 GODOT=godot   # 或 D:/Godot/Godot_v4.7.2-stable_win64_console.exe --headless
 
-$GODOT --headless --path . -s res://tests/run_cli_script.gd     # Task.md 脚本 A–G
+$GODOT --headless --path . -s res://tests/run_cli_script.gd     # CLI 验收脚本 A–G
 $GODOT --headless --path . -s res://tests/run_scoped_cli.gd     # 作用域规则 CLI
-$GODOT --headless --path . -s res://tests/run_book_examples.gd  # NDpack 改编证明
+$GODOT --headless --path . -s res://tests/run_book_examples.gd  # 教材改编证明
 $GODOT --headless --path . -s res://tests/run_stability.gd      # 解析/作用域/长链稳定性
 $GODOT --headless --path . -s res://tests/run_curriculum.gd     # 61 关解法与规则白名单
 $GODOT --headless --path . -s res://tests/run_progress.gd       # 顺序解锁与进度持久化
@@ -316,11 +266,10 @@ $GODOT --headless --path . -s res://tests/run_title_idle.gd     # 标题页/弹�
 - 拖拽开始时的快照会造成规则副本短暂变 VALID；必须抑制这一路反馈，否则“拿起/放下整块”会响，而它和拆开+拼回不是一回事。
 - Toast 使用 `make_display_label()` 时注意其默认 `clip_text = true`；放进 PanelContainer 后最小宽度会塌成 25px，文字直接看不见。需要 `clip_text = false` 并关闭 overrun trimming。
 
-#### Web 字体与构建
+#### Web 字体
 
 - 内嵌 Baloo 2 没有 `↔`，Nunito / Patrick Hand 连 `→` 都没有；Web 没有系统字体 fallback。所有**文字型**公式必须使用 ASCII `->` / `<->`；公式卡由 `FormulaVisual` 自定义绘制箭头，不受影响。
 - 内嵌字体也没有 `★`（U+2605）。Levels 页的可选关现在直接沿用正常编号 `7 / 8 / 9`，不再依赖任何星形字符；可选状态改用文本 `OPTIONAL`。
-- Web 构建用 `tools/export_web.sh`（先 `--import` 再导出）；butler 从本机直连 itch API 可能超时，需要设置 `HTTP_PROXY` / `HTTPS_PROXY`（例如本机代理 `http://127.0.0.1:7897`）。`butler push` 推的是 `build/web` 目录，不是 zip。
 - 嵌套窗口层 z-index 和父窗口缩放同时存在时，输入命中和绘制顺序要分开验证；只检查 `size` 正确不足以证明窗口真的可见。
 
 ### 目录结构
@@ -348,14 +297,8 @@ audio/sfx/typing/          Formula Builder 的键盘敲击音
 audio/sfx/ui/              UI 按钮点击与悬停音（与卡片音色分开）
 audio/music/               8-bit BGM 循环与音乐授权说明
 tools/generate_bgm.py      BGM 合成脚本（可重新生成）
-tools/export_web.sh        Web 导出 + itch.io zip 脚本
-tools/make_promo_cover.gd  宣传封面渲染脚本
-tools/make_promo_screens.gd 实机截图渲染脚本
-tools/record_nested_five.gd 五层 Assume 嵌套布局录屏脚本
 ui/fonts/                  Baloo 2 / Nunito / Patrick Hand（OFL）
 ui/props/                  Rain / Wet / Slippery / Dangerous 图标
-NDpack.pdf                 习题与规则来源
-Task.md                    第一阶段 CLI 验收说明（历史文档）
 ```
 
 ### 关卡与章节
@@ -370,7 +313,7 @@ Task.md                    第一阶段 CLI 验收说明（历史文档）
 6. **Synthesis** — 用矛盾推导出 ~~I，并完成更长的混合证明。
 7. **Grand Finale** — 没有新规则；Peirce、De Morgan、嵌套双条件等纯命题终极挑战。
 
-章节数据包含稳定关卡 id、教学标签和可选挑战标记。每章完成前 6 个核心关后，第 7/8/9 关作为普通编号的 optional 关解锁；顶部栏会同时出现 **NEXT**（本章下一关，通常是第 7 关）和 **NEXT CHAPTER**（下一章第 1 关）。`tests/run_curriculum.gd` 会为每一关运行 CLI 解题脚本，并断言只使用了该章已解锁的规则；新增关卡来自 `NDpack.pdf` 的命题逻辑部分（4.1–4.6），未引入量词或 identity。
+章节数据包含稳定关卡 id、教学标签和可选挑战标记。每章完成前 6 个核心关后，第 7/8/9 关作为普通编号的 optional 关解锁；顶部栏会同时出现 **NEXT**（本章下一关，通常是第 7 关）和 **NEXT CHAPTER**（下一章第 1 关）。`tests/run_curriculum.gd` 会为每一关运行 CLI 解题脚本，并断言只使用了该章已解锁的规则；新增关卡来自 The Natural Deduction Pack 的命题逻辑部分（4.1–4.6），未引入量词或 identity。
 
 进度保存到 `user://progress.cfg`；章节页显示每章核心关完成数、可选关完成状态和总进度。每章第 7/8/9 关都是 optional，完成前 6 个核心关即可进入下一章。未学到的规则卡会隐藏，ASSUME 在第二章才出现，第一次进入章节时会显示新规则介绍卡。
 
@@ -378,7 +321,7 @@ Task.md                    第一阶段 CLI 验收说明（历史文档）
 
 ## 已知限制
 
-- 当前版本只覆盖命题逻辑（L1）；∀/∃ 量词、谓词项与 identity（=）尚未实现，NDpack 的 4.7–4.10 仍留作后续里程碑。
+- 当前版本只覆盖命题逻辑（L1）；∀/∃ 量词、谓词项与 identity（=）尚未实现，The Natural Deduction Pack 的 4.7–4.10 仍留作后续里程碑。
 - 进度保存在 `user://progress.cfg`；目前没有游戏内“重置进度”按钮（可手动删除该文件）。
 - 章节按顺序解锁；挑战关开放后不影响下一章解锁。
 - 全量规则架有 9 张卡，但按章节隐藏未学规则；`ds`、`lem` 与完整作用域卡目前仅供 CLI/核心使用（`create_rule_block` 仍可创建作用域卡）。
@@ -392,4 +335,4 @@ Task.md                    第一阶段 CLI 验收说明（历史文档）
 - 字体：Baloo 2、Nunito、Patrick Hand，均为 SIL Open Font License（`ui/fonts/OFL-*.txt`）。
 - 音效：Kenney Casino Audio / Interface Sounds 与 VSCO2 CE（CC0）；Formula Builder 键盘音为 eklee / qubodup 的 “Single Key Press Sounds”（CC-BY 3.0，署名见 `audio/sfx/CREDITS.md`）。全部授权文本见 `audio/licenses/`。
 - BGM：`audio/music/deduction_loop.ogg` 是本项目原创合成曲目，无第三方采样或旋律，详见 `audio/music/CREDITS.md`。
-- 习题参考：`NDpack.pdf`。
+- 习题参考：Alastair Carr, *The Natural Deduction Pack*。

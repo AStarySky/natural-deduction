@@ -1,18 +1,19 @@
 # Godot generated data
 .godot/
-build/promo/*.import
 
-# Build outputs and local artifacts
-build/*
-!build/promo/
-!build/promo/**
-!build/NaturalDeduction-promo.zip
-*.zip
-!build/NaturalDeduction-promo.zip
-
-# Local/raw captures and course-only material
+# Local build artifacts, promo material, and course-only files
+build/
 P&KU.png
 assignmentP.md
+assignmentP_report.md
+assignmentP_report.pdf
+NDpack.pdf
+Task.md
+tools/export_web.sh
+tools/make_promo_*
+tools/promo_*
+tools/record_nested_five.*
+tools/make_report_assets.*
 3140120_screenshots_*.jpg
 3140120_screenshots_*.jpg.import
 屏幕截图*.png

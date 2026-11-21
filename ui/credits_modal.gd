@@ -32,7 +32,7 @@ func _build_body(body: VBoxContainer) -> void:
 		"Designed and built with Godot Engine 4.7.",
 	])
 	_section(content, "CURRICULUM", [
-		"Proof exercises adapted from the included NDpack.pdf.",
+		"Proof exercises adapted from Alastair Carr, The Natural Deduction Pack.",
 	])
 	_section(content, "MUSIC", [
 		"Original 8-bit soundtrack composed for this project.",
