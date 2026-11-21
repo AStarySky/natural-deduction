@@ -2,6 +2,9 @@
 
 一个用**拖拽卡片拼证明树**来学习自然演绎（Natural Deduction）的二维矢量解谜游戏。
 
+- 源码仓库：<https://github.com/AStarySky/natural-deduction>
+- 在线试玩：<https://mountfujish.itch.io/natural-deduction>
+
 - 引擎：Godot **4.7**（GDScript，`gl_compatibility` 渲染器）
 - 主场景：`res://ui/main.tscn`
 - 目标平台：桌面（Windows / macOS / Linux）

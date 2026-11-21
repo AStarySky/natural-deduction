@@ -8,7 +8,7 @@
 | 学号 | `[请填写]` |
 | 院系 | `[请填写]` |
 | 项目名称 | Natural Deduction |
-| GitHub 仓库 | `[请填写 GitHub 链接]` |
+| GitHub 仓库 | <https://github.com/AStarySky/natural-deduction> |
 | 在线演示 | <https://mountfujish.itch.io/natural-deduction> |
 | 提交版本 | Web build `0.3.4` / build `#2448417` |
 | 主要技术 | Godot 4.7.2、GDScript、WebAssembly（Godot Web export） |
@@ -748,7 +748,7 @@ CURRICULUM RESULT: 1263 checks, 0 failed
 引用与复用的外部资源：见上节。
 ```
 
-> 提交前请把姓名、学号、院系和 GitHub 链接替换为真实信息，并根据实际参与情况调整 AI 声明。
+> 提交前请把姓名、学号、院系替换为真实信息，并根据实际参与情况调整 AI 声明。
 
 ## 9. 评分点对应
 
