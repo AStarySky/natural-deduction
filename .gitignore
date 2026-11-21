@@ -1,0 +1,26 @@
+# Godot generated data
+.godot/
+build/promo/*.import
+
+# Build outputs and local artifacts
+build/*
+!build/promo/
+!build/promo/**
+!build/NaturalDeduction-promo.zip
+*.zip
+!build/NaturalDeduction-promo.zip
+
+# Local/raw captures and course-only material
+P&KU.png
+assignmentP.md
+3140120_screenshots_*.jpg
+3140120_screenshots_*.jpg.import
+屏幕截图*.png
+屏幕截图*.png.import
+.vscode/
+__pycache__/
+*.pyc
+
+# OS noise
+.DS_Store
+Thumbs.db

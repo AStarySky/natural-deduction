@@ -1,0 +1,54 @@
+# Natural Deduction CLI MUR - acceptance scripts A through G.
+# Each "# === Script X" header starts an independent CLI session.
+# Run them through tests/run_cli_script.gd, not as one REPL session.
+
+# === Script A: correct proof ===
+# A, A -> B, B -> C |- C by two modus ponens steps.
+premise A
+premise A -> B
+premise B -> C
+goal C
+apply impl_elim p1 p2
+apply impl_elim n1 p3
+validate
+tree
+
+# === Script B: invalid proof rejected ===
+# and_intro derives A & (A -> B); validate must reject it against goal B.
+premise A
+premise A -> B
+goal B
+apply and_intro p1 p2
+validate
+
+# === Script C: rule input mismatch ===
+# A and B provide no implication, so impl_elim must fail with a readable error.
+premise A
+premise B
+apply impl_elim p1 p2
+
+# === Script D: conjunction intro/elim chain ===
+# A & B is built and then B is recovered; validate succeeds against goal B.
+premise A
+premise B
+goal B
+apply and_intro p1 p2
+apply and_elim_right n1
+validate
+
+# === Script E: disjunction intro without extra formula ===
+# The other side is required and must not be guessed.
+premise A
+apply or_intro_left p1
+
+# === Script F: disjunction intro with extra formula ===
+# A with explicit other side B derives A | B, matching the goal.
+premise A
+goal A | B
+apply or_intro_left p1 B
+validate
+
+# === Script G: parser error handling ===
+# Both malformed inputs must fail readably and must not create nodes.
+premise A ->
+goal (A & B
