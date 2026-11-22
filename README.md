@@ -167,6 +167,7 @@ $GODOT --headless --path . -s res://tests/run_curriculum.gd     # 61 关解法�
 $GODOT --headless --path . -s res://tests/run_progress.gd       # 顺序解锁与进度持久化
 $GODOT --headless --path . -s res://tests/run_ui_model.gd       # UI 模型与场景 drop
 $GODOT --headless --path . -s res://tests/run_ui_contracts.gd   # 61 关加载与 UI 工厂契约
+$GODOT --headless --path . -s res://tests/run_scope_limits.gd   # 五层 Assume 深度/关闭/Undo
 $GODOT --headless --path . -s res://tests/run_ui_scoped.gd      # 假设浮窗与作用域卡
 $GODOT --headless --path . -s res://tests/run_chapter_ui.gd     # 章节页/规则架/ASSUME 解锁
 $GODOT --headless --path . -s res://tests/run_shortcuts.gd      # 数字规则/A 快捷键与触发边界
@@ -188,6 +189,7 @@ $GODOT --headless --path . -s res://tests/run_title_idle.gd     # 标题页/弹�
 | `run_progress` | 40 | 0 |
 | `run_ui_model` | 103 | 0 |
 | `run_ui_contracts` | 966 | 0 |
+| `run_scope_limits` | 23 | 0 |
 | `run_ui_scoped` | 195 | 0 |
 | `run_chapter_ui` | 43 | 0 |
 | `run_shortcuts` | 35 | 0 |
