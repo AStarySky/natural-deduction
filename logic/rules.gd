@@ -289,10 +289,13 @@ static func _or_elim_impl(premises: Array) -> RuleDerivationRes:
 		)
 	var left_impl = null
 	var right_impl = null
+	# Fill each side at most once. When both disjuncts are equal (A | A), the
+	# second implication must go to the still-empty right side instead of
+	# overwriting the left one.
 	for implication in implications:
-		if implication.left.equals(disjunction.left):
+		if left_impl == null and implication.left.equals(disjunction.left):
 			left_impl = implication
-		elif implication.left.equals(disjunction.right):
+		elif right_impl == null and implication.left.equals(disjunction.right):
 			right_impl = implication
 	if left_impl == null or right_impl == null:
 		return _failure(
