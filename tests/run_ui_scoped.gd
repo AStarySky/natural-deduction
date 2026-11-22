@@ -131,6 +131,34 @@ func _run() -> void:
 	)
 	_check(ProofAdapterRes.validate(or_elim, _f("A | B")).ok, "or_elim UI proof validates")
 
+	# \/Elim with identical sides: A | A and one assumption group used in both cases.
+	var same_a = main.create_assumption_block(_f("A")); same_a.reset_size()
+	var same_a_copy = main.duplicate_block(same_a)
+	if same_a_copy != null:
+		same_a_copy.reset_size()
+	var same_left = main.create_rule_block("impl_elim"); same_left.reset_size()
+	same_left.sockets[0].attach_block(same_a, false)
+	same_left.sockets[1].attach_block(_chip(main, "A -> C"), false)
+	same_left.refresh()
+	var same_right = main.create_rule_block("impl_elim"); same_right.reset_size()
+	same_right.sockets[0].attach_block(same_a_copy, false)
+	same_right.sockets[1].attach_block(_chip(main, "A -> C"), false)
+	same_right.refresh()
+	var same_or = main.create_rule_block("or_elim"); same_or.reset_size()
+	same_or.sockets[0].attach_block(_chip(main, "A | A"), false)
+	same_or.sockets[1].attach_block(same_left, false)
+	same_or.sockets[2].attach_block(same_right, false)
+	same_or.refresh()
+	_check(
+		same_or.get_result_formula() != null
+		and same_or.get_result_formula().to_string() == "C",
+		"or_elim UI accepts A | A"
+	)
+	_check(
+		ProofAdapterRes.validate(same_or, _f("C")).ok,
+		"or_elim UI proof with identical sides validates"
+	)
+
 	# <->Intro: A -> B under A and B -> A under B
 	var a2 = main.create_assumption_block(_f("A")); a2.reset_size()
 	var b2 = main.create_assumption_block(_f("B")); b2.reset_size()

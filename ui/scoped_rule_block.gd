@@ -310,6 +310,10 @@ func _candidate_sets(proof_formulas: Array, free_by_proof: Array) -> Array:
 	return sets
 
 func _auto_select() -> void:
+	# Prefer distinct assumption groups when both case branches expose the
+	# same formula. A | A still allows one group to be reused as a fallback;
+	# ProofTree treats that as one discharged occurrence.
+	var used: Dictionary = {}
 	for slot in range(_binder_slots.size()):
 		var current: int = int(_binder_slots[slot])
 		var candidates: Array = _candidates[slot] if slot < _candidates.size() else []
@@ -318,10 +322,29 @@ func _auto_select() -> void:
 			if candidate.get_assumption_group() == current:
 				valid = true
 				break
-		if not valid:
+		if not valid or used.has(current):
 			_binder_slots[slot] = -1
-		if int(_binder_slots[slot]) < 0 and candidates.size() == 1:
-			_binder_slots[slot] = candidates[0].get_assumption_group()
+		if int(_binder_slots[slot]) >= 0:
+			used[int(_binder_slots[slot])] = true
+
+	for slot in range(_binder_slots.size()):
+		if int(_binder_slots[slot]) >= 0:
+			continue
+		var candidates: Array = _candidates[slot] if slot < _candidates.size() else []
+		var fallback := -1
+		var chosen := -1
+		for candidate in candidates:
+			var group: int = candidate.get_assumption_group()
+			if fallback < 0:
+				fallback = group
+			if not used.has(group):
+				chosen = group
+				break
+		if chosen < 0:
+			chosen = fallback
+		if chosen >= 0:
+			_binder_slots[slot] = chosen
+			used[chosen] = true
 
 func _rebuild_binder_rows() -> void:
 	for slot in range(_proof_flows.size()):

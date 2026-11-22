@@ -70,6 +70,25 @@ func _run() -> void:
 	_check(disjunction_results[6].node.formula.to_string() == "A | B", "or_elim derives the common case result")
 	_check(disjunction_results[7].validation.ok, "or_elim with used case assumptions validates")
 
+	var identical_disjunction = _session([
+		"goal C",
+		"premise A | A",
+		"premise A -> C",
+		"assume A",
+		"apply impl_elim a1 p2",
+		"apply or_elim p1 a1 n1 a1 n1",
+		"validate",
+	])
+	var identical_results: Array = identical_disjunction["results"]
+	_check(
+		identical_results[5].ok and identical_results[5].node.formula.to_string() == "C",
+		"or_elim accepts A | A with one shared case assumption"
+	)
+	_check(
+		identical_results[6].validation.ok,
+		"or_elim with identical sides validates"
+	)
+
 	var biconditional = _session([
 		"goal A <-> B",
 		"premise A",

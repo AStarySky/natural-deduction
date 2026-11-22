@@ -169,9 +169,18 @@ func apply_scoped(
 		assumption_nodes.append(node)
 		assumption_formulas.append(node.formula)
 
+	# or_elim may legitimately use the same assumption occurrence for both
+	# cases when the disjunction has identical sides (for example A | A):
+	# the single open assumption is discharged once. Other scoped rules still
+	# require distinct assumptions.
+	var duplicate_case_assumption: bool = (
+		rule_id == "or_elim"
+		and assumption_ids.size() == 2
+		and assumption_ids[0] == assumption_ids[1]
+	)
 	var seen_assumptions: Dictionary = {}
 	for assumption_id in assumption_ids:
-		if seen_assumptions.has(assumption_id):
+		if seen_assumptions.has(assumption_id) and not duplicate_case_assumption:
 			return _rule_failure("%s: assumption id '%s' is used twice" % [rule_id, assumption_id])
 		seen_assumptions[assumption_id] = true
 
@@ -216,6 +225,19 @@ func _scoped_context(rule_id: String, proofs: Array, assumptions: Array) -> Dict
 			var b = assumptions[1]
 			if _contains_context(disjunction.context, a.id) or _contains_context(disjunction.context, b.id):
 				return _context_failure("or_elim: the disjunction depends on a case assumption")
+			# A | A can be eliminated with one assumption shared by both
+			# branches. That occurrence is discharged once, not twice.
+			if a.id == b.id:
+				return {
+					"ok": true,
+					"context": _context_union(
+						disjunction.context,
+						_context_union(
+							_context_remove(case_a.context, [a.id]),
+							_context_remove(case_b.context, [a.id])
+						)
+					),
+				}
 			if _contains_context(case_a.context, b.id):
 				return _context_failure("or_elim: the left case uses the right case assumption")
 			if _contains_context(case_b.context, a.id):

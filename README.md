@@ -178,13 +178,13 @@ $GODOT --headless --path . -s res://tests/run_title_idle.gd     # 标题页/弹�
 | 套件 | 断言数 | 失败 |
 |---|---:|---:|
 | `run_cli_script`（7 个脚本） | 44 | 0 |
-| `run_scoped_cli` | 23 | 0 |
+| `run_scoped_cli` | 25 | 0 |
 | `run_book_examples`（17 题） | 17 | 0 |
 | `run_stability` | 1177 | 0 |
 | `run_curriculum` | 1263 | 0 |
 | `run_progress` | 40 | 0 |
 | `run_ui_model` | 103 | 0 |
-| `run_ui_scoped` | 193 | 0 |
+| `run_ui_scoped` | 195 | 0 |
 | `run_chapter_ui` | 43 | 0 |
 | `run_shortcuts` | 35 | 0 |
 | `run_formula_builder` | 22 | 0 |
