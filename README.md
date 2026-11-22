@@ -160,6 +160,7 @@ GODOT=godot   # 或 D:/Godot/Godot_v4.7.2-stable_win64_console.exe --headless
 
 $GODOT --headless --path . -s res://tests/run_cli_script.gd     # CLI 验收脚本 A–G
 $GODOT --headless --path . -s res://tests/run_scoped_cli.gd     # 作用域规则 CLI
+$GODOT --headless --path . -s res://tests/run_invalid_proofs.gd # 错误/不可靠证明的拒绝集
 $GODOT --headless --path . -s res://tests/run_book_examples.gd  # 教材改编证明
 $GODOT --headless --path . -s res://tests/run_stability.gd      # 解析/作用域/长链稳定性
 $GODOT --headless --path . -s res://tests/run_curriculum.gd     # 61 关解法与规则白名单
@@ -180,6 +181,7 @@ $GODOT --headless --path . -s res://tests/run_title_idle.gd     # 标题页/弹�
 |---|---:|---:|
 | `run_cli_script`（7 个脚本） | 44 | 0 |
 | `run_scoped_cli` | 25 | 0 |
+| `run_invalid_proofs` | 50 | 0 |
 | `run_book_examples`（17 题） | 17 | 0 |
 | `run_stability` | 1177 | 0 |
 | `run_curriculum` | 1263 | 0 |
