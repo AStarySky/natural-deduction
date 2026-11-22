@@ -4,6 +4,7 @@
 # Local build artifacts, promo material, and course-only files
 build/
 P&KU.png
+P&KU.png.import
 assignmentP.md
 assignmentP_report.md
 assignmentP_report.pdf
@@ -18,6 +19,8 @@ tools/make_report_assets.*
 3140120_screenshots_*.jpg.import
 屏幕截图*.png
 屏幕截图*.png.import
+_cgi-bin_*.jpg
+_cgi-bin_*.jpg.import
 .vscode/
 __pycache__/
 *.pyc
