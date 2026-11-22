@@ -36,6 +36,7 @@ func _run() -> void:
 	_test_precedence()
 	_test_scope_guards()
 	_test_vacuous_and_identity()
+	_test_or_elim_impl_same_sides()
 	_test_deep_scope()
 	_test_long_simple_chain()
 	_test_cli_fuzz_and_isolation()
@@ -219,6 +220,30 @@ func _test_vacuous_and_identity() -> void:
 			_join(validation.errors).contains(second.id),
 			"undischarged error names the surviving assumption"
 		)
+
+## or_elim_impl with identical disjuncts: P | P, P -> Q, P -> Q |- Q.
+func _test_or_elim_impl_same_sides() -> void:
+	var tree := ProofTreeRes.new()
+	var disj := tree.add_premise(_parse("P | P"))
+	var impl := tree.add_premise(_parse("P -> Q"))
+	var same := tree.apply_rule("or_elim_impl", [disj.id, impl.id, impl.id])
+	_check(same.ok, "or_elim_impl accepts P | P with the same implication twice")
+	if same.ok:
+		_check(same.node.formula.to_string() == "Q", "or_elim_impl on P | P concludes Q")
+		_check(tree.validate(same.node.id, _parse("Q")).ok, "or_elim_impl on P | P validates")
+
+	var other := tree.add_premise(_parse("P -> R"))
+	var mixed := tree.apply_rule("or_elim_impl", [disj.id, impl.id, other.id])
+	_check(not mixed.ok, "or_elim_impl on P | P still rejects different consequents")
+
+	var ab := tree.add_premise(_parse("A | B"))
+	var a_to_c := tree.add_premise(_parse("A -> C"))
+	var twice_left := tree.apply_rule("or_elim_impl", [ab.id, a_to_c.id, a_to_c.id])
+	_check(not twice_left.ok, "or_elim_impl on A | B rejects two left-side implications")
+
+	var b_to_c := tree.add_premise(_parse("B -> C"))
+	var swapped := tree.apply_rule("or_elim_impl", [b_to_c.id, ab.id, a_to_c.id])
+	_check(swapped.ok, "or_elim_impl still accepts inputs in any order")
 
 func _test_deep_scope() -> void:
 	var tree := ProofTreeRes.new()
