@@ -34,13 +34,13 @@ static func formula_block(mode: String) -> Dictionary:
 		"margin_side": 9.0,
 		"margin_top": 8.0,
 		"separation": 2,
-		"badge_size": 10.0,
-		"badge_radius": 5,
+		"badge_size": 8.0,
+		"badge_radius": 4,
 		"tab_size": Vector2(38, 4),
 		"token_size": 28,
 		"font_size": 14,
 		"visual_min_height": 34.0,
-		"corner_inset": 6.0,
+		"corner_inset": 2.0,
 		"show_header": false,
 	}
 
@@ -70,7 +70,7 @@ static func assumption_block(mode: String) -> Dictionary:
 		"token_size": 22,
 		"font_size": 12,
 		"visual_min_height": 34.0,
-		"corner_inset": 6.0,
+		"corner_inset": 2.0,
 		"show_header": false,
 	}
 
