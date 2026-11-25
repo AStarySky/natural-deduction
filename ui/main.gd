@@ -168,6 +168,7 @@ func set_card_size_mode(mode: String) -> void:
 		return
 	_ui_settings.set_card_size_mode(normalized)
 	get_tree().call_group("nd_formula_card", "apply_card_size_mode", normalized)
+	get_tree().call_group("nd_rule_block", "apply_card_size_mode", normalized)
 
 func _setup_audio() -> void:
 	if DisplayServer.get_name() == "headless":

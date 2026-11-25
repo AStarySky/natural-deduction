@@ -13,6 +13,7 @@ const FormulaRes = preload("res://logic/formula.gd")
 const FormulaVisualRes = preload("res://ui/formula_visual.gd")
 const ParserRes = preload("res://logic/formula_parser.gd")
 const RulesRes = preload("res://logic/rules.gd")
+const CardMetrics = preload("res://ui/card_metrics.gd")
 
 enum State { EMPTY, PENDING, ERROR, VALID }
 
@@ -37,11 +38,19 @@ var _inputs_row: HBoxContainer = null
 var _or_separator: Label = null
 var _rule_icon = null
 var _side_switch = null
+var _header: HBoxContainer = null
+var _overlay: Control = null
+var _corner_warning: PanelContainer = null
+var _corner_side_switch = null
+var _corner_copy = null
+var _mode := CardMetrics.DEFAULT
 
 func setup(p_rule_id: String, p_controller) -> void:
 	rule_id = p_rule_id
 	side = 1 if rule_id.ends_with("_right") else 0
 	controller = p_controller
+	_mode = _resolve_mode()
+	add_to_group("nd_rule_block")
 	custom_minimum_size = Vector2(230, 0)
 	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	tooltip_text = RuleMetaRes.tooltip(rule_id)
@@ -93,9 +102,10 @@ func setup(p_rule_id: String, p_controller) -> void:
 	body.add_theme_constant_override("separation", 4)
 	_body_panel.add_child(body)
 
-	var header := HBoxContainer.new()
-	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	body.add_child(header)
+	_header = HBoxContainer.new()
+	_header.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body.add_child(_header)
+	var header := _header
 
 	_warning_badge = PanelContainer.new()
 	_warning_badge.custom_minimum_size = Vector2(22, 22)
@@ -128,6 +138,48 @@ func setup(p_rule_id: String, p_controller) -> void:
 	copy_button.setup("copy", "Duplicate this rule and its inputs.")
 	copy_button.pressed.connect(_on_copy_pressed)
 	header.add_child(copy_button)
+
+	_overlay = Control.new()
+	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_body_panel.add_child(_overlay)
+
+	_corner_warning = PanelContainer.new()
+	_corner_warning.custom_minimum_size = Vector2(22, 22)
+	_corner_warning.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_corner_warning.visible = false
+	var corner_warning_label := UiStyle.make_display_label("!", 15, UiStyle.cream())
+	corner_warning_label.custom_minimum_size = Vector2(14, 14)
+	corner_warning_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	corner_warning_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_corner_warning.add_child(corner_warning_label)
+	_corner_warning.position = Vector2(6, 6)
+	_overlay.add_child(_corner_warning)
+
+	if _is_switchable():
+		_corner_side_switch = RuleSideSwitchRes.new()
+		_corner_side_switch.setup(side)
+		_corner_side_switch.tooltip_text = _side_switch_hint()
+		_corner_side_switch.changed.connect(_on_side_changed)
+		_corner_side_switch.anchor_left = 1.0
+		_corner_side_switch.anchor_right = 1.0
+		_corner_side_switch.offset_left = -100.0
+		_corner_side_switch.offset_top = 6.0
+		_corner_side_switch.offset_right = -42.0
+		_corner_side_switch.offset_bottom = 32.0
+		_overlay.add_child(_corner_side_switch)
+
+	_corner_copy = IconButtonRes.new()
+	_corner_copy.setup("copy", "Duplicate this rule and its inputs.")
+	_corner_copy.pressed.connect(_on_copy_pressed)
+	_corner_copy.anchor_left = 1.0
+	_corner_copy.anchor_right = 1.0
+	_corner_copy.offset_left = -36.0
+	_corner_copy.offset_top = 6.0
+	_corner_copy.offset_right = -6.0
+	_corner_copy.offset_bottom = 36.0
+	_overlay.add_child(_corner_copy)
+	_apply_mode_geometry()
 
 	var icon_center := CenterContainer.new()
 	icon_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -175,6 +227,34 @@ func setup(p_rule_id: String, p_controller) -> void:
 	body.add_child(_out_tab)
 
 	refresh()
+
+func _resolve_mode() -> String:
+	if controller != null and controller.has_method("get_card_size_mode"):
+		return CardMetrics.normalize(str(controller.get_card_size_mode()))
+	return CardMetrics.DEFAULT
+
+func apply_card_size_mode(mode: String) -> void:
+	var normalized := CardMetrics.normalize(mode)
+	if normalized == _mode:
+		return
+	_mode = normalized
+	_apply_mode_geometry()
+	refresh_visuals()
+	update_minimum_size()
+	reset_size()
+
+func _apply_mode_geometry() -> void:
+	var compact := _mode == CardMetrics.COMPACT
+	if _header != null:
+		_header.visible = not compact
+	if _overlay != null:
+		_overlay.visible = compact
+	if _corner_side_switch != null:
+		_corner_side_switch.visible = compact and _is_switchable()
+	if _corner_copy != null:
+		_corner_copy.visible = compact
+	if _corner_warning != null:
+		_corner_warning.visible = compact and state == State.ERROR
 
 ## A second, visually separate socket for the other side of a disjunction.
 func _add_extra_socket(parent: HBoxContainer) -> void:
@@ -224,7 +304,12 @@ func _on_side_changed(new_side: int) -> void:
 		return
 	if _rule_icon != null:
 		_rule_icon.setup(rule_id)
-	_side_switch.tooltip_text = _side_switch_hint()
+	if _side_switch != null:
+		_side_switch.set_side(side)
+		_side_switch.tooltip_text = _side_switch_hint()
+	if _corner_side_switch != null:
+		_corner_side_switch.set_side(side)
+		_corner_side_switch.tooltip_text = _side_switch_hint()
 	_reorder_side_inputs()
 	tooltip_text = RuleMetaRes.tooltip(rule_id)
 	if controller != null and controller.has_method("play_sfx"):
@@ -419,13 +504,18 @@ func refresh_visuals() -> void:
 			UiStyle.panel_style(UiStyle.cream(), UiStyle.border_color(), 12, 3, false)
 		)
 	if _warning_badge != null:
-		_warning_badge.visible = state == State.ERROR
+		var compact := _mode == CardMetrics.COMPACT
+		_warning_badge.visible = state == State.ERROR and not compact
+		if _corner_warning != null:
+			_corner_warning.visible = state == State.ERROR and compact
 		var warning_box := UiStyle.panel_style(UiStyle.error_color(), UiStyle.border_color(), 11, 2, false)
 		warning_box.content_margin_left = 2.0
 		warning_box.content_margin_top = 1.0
 		warning_box.content_margin_right = 2.0
 		warning_box.content_margin_bottom = 1.0
 		_warning_badge.add_theme_stylebox_override("panel", warning_box)
+		if _corner_warning != null:
+			_corner_warning.add_theme_stylebox_override("panel", warning_box)
 
 	if _result_visual != null:
 		_result_visual.set_formula(result_formula)

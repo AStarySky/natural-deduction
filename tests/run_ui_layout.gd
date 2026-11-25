@@ -78,6 +78,13 @@ func _run() -> void:
 	rule_tile.reset_size()
 	_check(rule_tile.custom_minimum_size == Vector2(92, 112), "rule palette tile unchanged")
 
+	var rule_card = main.create_rule_block("impl_elim")
+	main._base_canvas.add_child(rule_card)
+	rule_card.reset_size()
+	var compact_rule_h: float = rule_card.size.y
+	_check(not rule_card._header.visible, "compact rule header hidden")
+	_check(rule_card._overlay.visible and rule_card._corner_copy.visible, "compact rule corner controls visible")
+
 	main.set_card_size_mode(CardMetrics.COMFORT)
 	await process_frame
 	_check(main.get_card_size_mode() == CardMetrics.COMFORT, "comfort mode active")
@@ -86,6 +93,8 @@ func _run() -> void:
 	_check(chip._header.visible and not chip._corner_badge.visible, "comfort formula header restored")
 	_check(assumption.custom_minimum_size == Vector2(104, 92), "comfort AssumptionBlock min size")
 	_check(premise.custom_minimum_size == Vector2(80, 84), "comfort premise tile min size")
+	_check(rule_card._header.visible and not rule_card._overlay.visible, "comfort rule header restored")
+	_check(rule_card.size.y > compact_rule_h, "comfort rule card is taller")
 
 	main.set_card_size_mode(CardMetrics.COMPACT)
 	await process_frame
