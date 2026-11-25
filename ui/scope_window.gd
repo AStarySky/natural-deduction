@@ -74,27 +74,19 @@ func setup_window(p_controller, formula: FormulaRes, group: int, tint: Color = C
 	_window_dots.minimize_requested.connect(_on_done)
 	title_row.add_child(_window_dots)
 
+	# Keep EDIT on the left, immediately after the traffic lights, so its
+	# position is identical at every nesting level.
+	_edit_button = Button.new()
+	_edit_button.text = "EDIT"
+	_edit_button.custom_minimum_size = Vector2(52, UiStyle.BLOCK_CONTROL_HEIGHT)
+	_edit_button.tooltip_text = "Edit this assumption and all of its copies."
+	UiStyle.style_block_button(_edit_button, tint, 15)
+	_edit_button.pressed.connect(_on_edit)
+	title_row.add_child(_edit_button)
+
 	_title_label = UiStyle.make_display_label("ASSUME " + formula.to_display_string(), 15, UiStyle.text_color())
 	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_row.add_child(_title_label)
-
-	_edit_button = Button.new()
-	_edit_button.text = "EDIT"
-	_edit_button.custom_minimum_size = Vector2(52, 26)
-	_edit_button.tooltip_text = "Edit this assumption and all of its copies."
-	UiStyle.style_button(_edit_button, tint, 15, 2)
-	# Keep the title row short enough for deeply nested windows: the button
-	# keeps the ASSUME font size but uses compact vertical chrome.
-	for state in ["normal", "hover", "pressed", "focus"]:
-		var style: StyleBoxFlat = _edit_button.get_theme_stylebox(state)
-		var compact := style.duplicate()
-		compact.content_margin_left = 4.0
-		compact.content_margin_right = 4.0
-		compact.content_margin_top = 1.0
-		compact.content_margin_bottom = 1.0
-		_edit_button.add_theme_stylebox_override(state, compact)
-	_edit_button.pressed.connect(_on_edit)
-	title_row.add_child(_edit_button)
 
 	_status = UiStyle.make_display_label("", 10, UiStyle.muted_text())
 	_status.custom_minimum_size = Vector2(130, 18)

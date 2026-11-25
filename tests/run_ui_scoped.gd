@@ -949,6 +949,13 @@ func _run() -> void:
 	_check(deep_records.size() == 5, "deep nesting: five scopes opened")
 	for index in range(1, deep_records.size()):
 		_check(bool(deep_records[index]["nested"]), "deep nesting: child %d is contained" % index)
+	var deep_edit_x: float = deep_records[0]["window"]._edit_button.position.x
+	for record in deep_records:
+		var deep_window = record["window"]
+		_check(
+			absf(deep_window._edit_button.position.x - deep_edit_x) <= 1.0,
+			"deep nesting: EDIT keeps the same left slot"
+		)
 
 	main.open_scope_for_formula(_f("U"))
 	await process_frame
@@ -1117,13 +1124,28 @@ func _run() -> void:
 	var edit_record = main._scope_open[-1]
 	var edit_window = edit_record["window"]
 	_check(edit_window._edit_button.visible, "EDIT is visible at normal size")
+	_check(
+		edit_window._edit_button.get_global_rect().position.x
+		< edit_window._title_label.get_global_rect().position.x,
+		"EDIT is left-aligned before ASSUME"
+	)
 	main.maximize_scope_window(edit_window)
 	await process_frame
 	await process_frame
 	_check(edit_window._edit_button.visible, "EDIT stays visible after maximizing")
 	_check(edit_window._edit_button.get_theme_font_size("font_size") == 15, "EDIT matches ASSUME text size")
 	var edit_style: StyleBoxFlat = edit_window._edit_button.get_theme_stylebox("normal")
-	_check(edit_style.border_width_left == 2, "EDIT has a lighter outline")
+	_check(
+		edit_style.border_width_left == 2
+		and edit_style.corner_radius_top_left == 10
+		and edit_style.shadow_size == 0,
+		"EDIT uses the flat block-control outline"
+	)
+	_check(
+		edit_window._edit_button.get_global_rect().position.x
+		< edit_window._title_label.get_global_rect().position.x,
+		"EDIT stays left-aligned after maximizing"
+	)
 	var edit_assumption = main.create_assumption_block(_f("P"), int(edit_record["group"]))
 	edit_record["inner_canvas"].add_child(edit_assumption)
 	edit_assumption.reset_size()
