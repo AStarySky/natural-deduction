@@ -251,10 +251,23 @@ func _apply_mode_geometry() -> void:
 		_overlay.visible = compact
 	if _corner_side_switch != null:
 		_corner_side_switch.visible = compact and _is_switchable()
+		_corner_side_switch.anchor_left = 0.0
+		_corner_side_switch.anchor_right = 0.0
+		_corner_side_switch.offset_left = 4.0
+		_corner_side_switch.offset_top = 0.0
+		_corner_side_switch.offset_right = 62.0
+		_corner_side_switch.offset_bottom = 26.0
 	if _corner_copy != null:
 		_corner_copy.visible = compact
+		_corner_copy.anchor_left = 1.0
+		_corner_copy.anchor_right = 1.0
+		_corner_copy.offset_left = -36.0
+		_corner_copy.offset_top = 0.0
+		_corner_copy.offset_right = -6.0
+		_corner_copy.offset_bottom = 30.0
 	if _corner_warning != null:
 		_corner_warning.visible = compact and state == State.ERROR
+		_corner_warning.position = Vector2(6.0, 32.0 if _is_switchable() else 0.0)
 
 ## A second, visually separate socket for the other side of a disjunction.
 func _add_extra_socket(parent: HBoxContainer) -> void:

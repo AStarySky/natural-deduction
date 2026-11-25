@@ -102,6 +102,19 @@ func _run() -> void:
 	_check(assumption.custom_minimum_size == Vector2(96, 68), "round-trip returns to compact assumption")
 	_check(premise.custom_minimum_size == Vector2(64, 64), "round-trip returns to compact premise")
 
+	var switch_card = main.create_rule_block("and_elim_left")
+	main._base_canvas.add_child(switch_card)
+	switch_card.reset_size()
+	await process_frame
+	var side_rect: Rect2 = switch_card._corner_side_switch.get_global_rect()
+	var icon_rect: Rect2 = switch_card._icon_plate.get_global_rect()
+	var copy_rect: Rect2 = switch_card._corner_copy.get_global_rect()
+	_check(not side_rect.intersects(icon_rect), "L/R switch does not cover the rule icon")
+	_check(
+		absf(copy_rect.position.y - icon_rect.position.y) <= 2.0,
+		"copy button aligns with the icon plate top"
+	)
+
 	var temp_path := "user://test_card_settings.cfg"
 	var store := UiSettingsStoreRes.new(temp_path)
 	store.set_card_size_mode(CardMetrics.COMFORT)
