@@ -261,7 +261,7 @@ static func make_drag_preview(text: String, accent_color: Color) -> Control:
 	return panel
 
 ## Apply the chunky Wordatro-style button skin to a standard Button.
-static func style_button(button: Button, bg: Color, font_size: int = 16) -> void:
+static func style_button(button: Button, bg: Color, font_size: int = 16, border_width: int = 3) -> void:
 	button.add_theme_font_override("font", display_font(800))
 	button.add_theme_font_size_override("font_size", font_size)
 	button.add_theme_color_override("font_color", text_color())
@@ -270,19 +270,19 @@ static func style_button(button: Button, bg: Color, font_size: int = 16) -> void
 	button.add_theme_color_override("font_focus_color", text_color())
 	button.add_theme_stylebox_override(
 		"normal",
-		panel_style(bg, border_color(), 12, 3, true)
+		panel_style(bg, border_color(), 12, border_width, true)
 	)
 	button.add_theme_stylebox_override(
 		"hover",
-		panel_style(bg.lightened(0.14), border_color(), 12, 3, true)
+		panel_style(bg.lightened(0.14), border_color(), 12, border_width, true)
 	)
 	button.add_theme_stylebox_override(
 		"pressed",
-		panel_style(bg.darkened(0.08), border_color(), 12, 3, true)
+		panel_style(bg.darkened(0.08), border_color(), 12, border_width, true)
 	)
 	button.add_theme_stylebox_override(
 		"focus",
-		panel_style(bg, accent(), 12, 3, true)
+		panel_style(bg, accent(), 12, border_width, true)
 	)
 
 static func state_color(is_valid: bool, has_error: bool, is_pending: bool) -> Color:

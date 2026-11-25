@@ -1098,11 +1098,14 @@ func _run() -> void:
 	await process_frame
 	var edit_record = main._scope_open[-1]
 	var edit_window = edit_record["window"]
-	_check(not edit_window._edit_button.visible, "EDIT is hidden before maximizing")
+	_check(edit_window._edit_button.visible, "EDIT is visible at normal size")
 	main.maximize_scope_window(edit_window)
 	await process_frame
 	await process_frame
-	_check(edit_window._edit_button.visible, "EDIT appears after maximizing")
+	_check(edit_window._edit_button.visible, "EDIT stays visible after maximizing")
+	_check(edit_window._edit_button.get_theme_font_size("font_size") == 15, "EDIT matches ASSUME text size")
+	var edit_style: StyleBoxFlat = edit_window._edit_button.get_theme_stylebox("normal")
+	_check(edit_style.border_width_left == 2, "EDIT has a lighter outline")
 	var edit_assumption = main.create_assumption_block(_f("P"), int(edit_record["group"]))
 	edit_record["inner_canvas"].add_child(edit_assumption)
 	edit_assumption.reset_size()

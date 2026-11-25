@@ -80,10 +80,19 @@ func setup_window(p_controller, formula: FormulaRes, group: int, tint: Color = C
 
 	_edit_button = Button.new()
 	_edit_button.text = "EDIT"
-	_edit_button.custom_minimum_size = Vector2(52, 20)
+	_edit_button.custom_minimum_size = Vector2(52, 26)
 	_edit_button.tooltip_text = "Edit this assumption and all of its copies."
-	UiStyle.style_button(_edit_button, tint, 9)
-	_edit_button.visible = false
+	UiStyle.style_button(_edit_button, tint, 15, 2)
+	# Keep the title row short enough for deeply nested windows: the button
+	# keeps the ASSUME font size but uses compact vertical chrome.
+	for state in ["normal", "hover", "pressed", "focus"]:
+		var style: StyleBoxFlat = _edit_button.get_theme_stylebox(state)
+		var compact := style.duplicate()
+		compact.content_margin_left = 4.0
+		compact.content_margin_right = 4.0
+		compact.content_margin_top = 1.0
+		compact.content_margin_bottom = 1.0
+		_edit_button.add_theme_stylebox_override(state, compact)
 	_edit_button.pressed.connect(_on_edit)
 	title_row.add_child(_edit_button)
 
@@ -310,7 +319,7 @@ func _refresh_window_controls(maximized: bool) -> void:
 	if _window_dots != null:
 		_window_dots.set_maximized(maximized)
 	if _edit_button != null:
-		_edit_button.visible = maximized
+		_edit_button.visible = true
 
 func set_assumption_formula(formula: FormulaRes) -> void:
 	assumption_formula = formula
