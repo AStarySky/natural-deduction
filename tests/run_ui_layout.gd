@@ -8,6 +8,9 @@ const ParserRes = preload("res://logic/formula_parser.gd")
 const CardMetrics = preload("res://ui/card_metrics.gd")
 const UiSettingsStoreRes = preload("res://ui/ui_settings_store.gd")
 const PaletteItemRes = preload("res://ui/palette_item.gd")
+const UiStyle = preload("res://ui/ui_style.gd")
+const IconButtonRes = preload("res://ui/icon_button.gd")
+const ScopeMarkerRes = preload("res://ui/scope_marker_block.gd")
 
 var checks: int = 0
 var failures: int = 0
@@ -95,6 +98,52 @@ func _run() -> void:
 	_check(not rule_card._header.visible, "compact rule header hidden")
 	_check(rule_card._overlay.visible and rule_card._corner_copy.visible, "compact rule corner controls visible")
 
+	var block_box: StyleBoxFlat = UiStyle.block_control_style(UiStyle.cream())
+	_check(block_box.corner_radius_top_left == 10, "block controls use radius 10")
+	_check(block_box.border_width_left == 2, "block controls use 2px stroke")
+	_check(block_box.shadow_size == 0, "block controls are flat")
+	_check(block_box.content_margin_left == 4.0, "block controls use horizontal padding 4")
+	_check(
+		rule_card._copy_button.custom_minimum_size == Vector2(30, 26)
+		and rule_card._copy_button.block_variant,
+		"rule copy is a 30x26 block control"
+	)
+	var copy_plate: StyleBoxFlat = rule_card._copy_button._plate_style(UiStyle.cream())
+	_check(
+		copy_plate.corner_radius_top_left == 10
+		and copy_plate.border_width_left == 2
+		and copy_plate.shadow_size == 0,
+		"rule copy plate matches block controls"
+	)
+	var sound = IconButtonRes.new()
+	sound.setup("sound", "test")
+	root.add_child(sound)
+	_check(sound.custom_minimum_size == Vector2(30, 30), "non-block icon keeps 30x30")
+	_check(not sound.block_variant, "sound icon keeps default variant")
+	var sound_plate: StyleBoxFlat = sound._plate_style(UiStyle.cream())
+	_check(
+		sound_plate.corner_radius_top_left == 9
+		and sound_plate.border_width_left == 3
+		and sound_plate.shadow_size == 4,
+		"non-block icon chrome unchanged"
+	)
+	sound.queue_free()
+
+	var marker = ScopeMarkerRes.new()
+	marker.controller = main
+	marker.setup_marker(_f("A"), 99, main, UiStyle.lavender())
+	main.add_child(marker)
+	_check(marker._open_button.custom_minimum_size == Vector2(52, 26), "marker OPEN is 52x26")
+	_check(marker._open_button.get_theme_font_size("font_size") == 14, "marker OPEN uses 14px")
+	var open_style: StyleBoxFlat = marker._open_button.get_theme_stylebox("normal")
+	_check(
+		open_style.corner_radius_top_left == 10
+		and open_style.border_width_left == 2
+		and open_style.shadow_size == 0,
+		"marker OPEN matches block controls"
+	)
+	marker.queue_free()
+
 	main.set_card_size_mode(CardMetrics.COMFORT)
 	await process_frame
 	_check(main.get_card_size_mode() == CardMetrics.COMFORT, "comfort mode active")
@@ -119,6 +168,21 @@ func _run() -> void:
 	var side_rect: Rect2 = switch_card._corner_side_switch.get_global_rect()
 	var icon_rect: Rect2 = switch_card._icon_plate.get_global_rect()
 	var copy_rect: Rect2 = switch_card._corner_copy.get_global_rect()
+	_check(switch_card._corner_side_switch.custom_minimum_size == Vector2(58, 26), "L/R switch is 58x26")
+	var switch_track: StyleBoxFlat = switch_card._corner_side_switch._track_style(UiStyle.cream())
+	_check(
+		switch_track.corner_radius_top_left == 10
+		and switch_track.border_width_left == 2
+		and switch_track.shadow_size == 0,
+		"L/R track matches block controls"
+	)
+	var switch_knob: StyleBoxFlat = switch_card._corner_side_switch._knob_style(UiStyle.cream())
+	_check(
+		switch_knob.corner_radius_top_left == 8
+		and switch_knob.border_width_left == 2
+		and switch_knob.shadow_size == 0,
+		"L/R knob matches block controls"
+	)
 	_check(not side_rect.intersects(icon_rect), "L/R switch does not cover the rule icon")
 	_check(
 		absf(copy_rect.position.y - icon_rect.position.y) <= 2.0,

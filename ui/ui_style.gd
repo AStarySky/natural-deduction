@@ -260,6 +260,39 @@ static func make_drag_preview(text: String, accent_color: Color) -> Control:
 	panel.add_child(label)
 	return panel
 
+## --- Proof-block micro controls -----------------------------------------
+
+const BLOCK_CONTROL_HEIGHT := 26.0
+const BLOCK_CONTROL_RADIUS := 10
+const BLOCK_CONTROL_BORDER := 2
+const BLOCK_CONTROL_PAD_X := 4.0
+const BLOCK_CONTROL_PAD_Y := 2.0
+
+## Flat control plate used by copy/L-R/OPEN/DISCHARGE controls. Cards already
+## have shadows; controls deliberately do not.
+static func block_control_style(
+	bg: Color,
+	border: Color = border_color()
+) -> StyleBoxFlat:
+	var box := panel_style(bg, border, BLOCK_CONTROL_RADIUS, BLOCK_CONTROL_BORDER, false)
+	box.content_margin_left = BLOCK_CONTROL_PAD_X
+	box.content_margin_top = BLOCK_CONTROL_PAD_Y
+	box.content_margin_right = BLOCK_CONTROL_PAD_X
+	box.content_margin_bottom = BLOCK_CONTROL_PAD_Y
+	return box
+
+static func style_block_button(button: Button, bg: Color, font_size: int = 14) -> void:
+	button.add_theme_font_override("font", display_font(800))
+	button.add_theme_font_size_override("font_size", font_size)
+	button.add_theme_color_override("font_color", text_color())
+	button.add_theme_color_override("font_hover_color", text_color())
+	button.add_theme_color_override("font_pressed_color", text_color())
+	button.add_theme_color_override("font_focus_color", text_color())
+	button.add_theme_stylebox_override("normal", block_control_style(bg))
+	button.add_theme_stylebox_override("hover", block_control_style(bg.lightened(0.14)))
+	button.add_theme_stylebox_override("pressed", block_control_style(bg.darkened(0.08)))
+	button.add_theme_stylebox_override("focus", block_control_style(bg, accent()))
+
 ## Apply the chunky Wordatro-style button skin to a standard Button.
 static func style_button(button: Button, bg: Color, font_size: int = 16, border_width: int = 3) -> void:
 	button.add_theme_font_override("font", display_font(800))

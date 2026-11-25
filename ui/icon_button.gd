@@ -9,14 +9,20 @@ signal secondary_pressed
 const UiStyle = preload("res://ui/ui_style.gd")
 
 var kind: String = "copy"
+var block_variant: bool = false
 var _hover: bool = false
 var _down: bool = false
 
-func setup(p_kind: String, tip: String) -> void:
+func setup(p_kind: String, tip: String, block_variant_enabled: bool = false) -> void:
 	kind = p_kind
+	block_variant = block_variant_enabled
 	add_to_group("nd_icon_button")
 	tooltip_text = tip
-	custom_minimum_size = Vector2(30, 30)
+	custom_minimum_size = (
+		Vector2(30, UiStyle.BLOCK_CONTROL_HEIGHT)
+		if block_variant
+		else Vector2(30, 30)
+	)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	mouse_entered.connect(_on_hover.bind(true))
@@ -50,14 +56,16 @@ func _gui_input(event: InputEvent) -> void:
 			if inside:
 				pressed.emit()
 
+func _plate_style(bg: Color) -> StyleBoxFlat:
+	if block_variant:
+		return UiStyle.block_control_style(bg)
+	return UiStyle.panel_style(bg, UiStyle.border_color(), 9, 3, true)
+
 func _draw() -> void:
 	var bg := UiStyle.lavender() if _hover else UiStyle.cream()
 	if _down:
 		bg = UiStyle.coral()
-	draw_style_box(
-		UiStyle.panel_style(bg, UiStyle.border_color(), 9, 3, true),
-		Rect2(Vector2.ZERO, size)
-	)
+	draw_style_box(_plate_style(bg), Rect2(Vector2.ZERO, size))
 	match kind:
 		"reset":
 			_draw_reset()

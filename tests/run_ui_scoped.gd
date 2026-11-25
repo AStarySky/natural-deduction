@@ -130,6 +130,24 @@ func _run() -> void:
 		"or_elim UI derives its common case result"
 	)
 	_check(ProofAdapterRes.validate(or_elim, _f("A | B")).ok, "or_elim UI proof validates")
+	var binder_button = null
+	for child in or_elim._proof_flows[0].get_children():
+		if child is Button:
+			binder_button = child
+			break
+	_check(binder_button != null, "DISCHARGE chip exists")
+	if binder_button != null:
+		_check(
+			binder_button.custom_minimum_size.y == 26.0,
+			"DISCHARGE chip is 26px tall"
+		)
+		var binder_style: StyleBoxFlat = binder_button.get_theme_stylebox("normal")
+		_check(
+			binder_style.corner_radius_top_left == 10
+			and binder_style.border_width_left == 2
+			and binder_style.shadow_size == 0,
+			"DISCHARGE chip matches block controls"
+		)
 
 	# \/Elim with identical sides: A | A and one assumption group used in both cases.
 	var same_a = main.create_assumption_block(_f("A")); same_a.reset_size()

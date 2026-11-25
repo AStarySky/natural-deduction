@@ -42,6 +42,7 @@ var _header: HBoxContainer = null
 var _overlay: Control = null
 var _corner_warning: PanelContainer = null
 var _corner_side_switch = null
+var _copy_button = null
 var _corner_copy = null
 var _mode := CardMetrics.DEFAULT
 
@@ -134,10 +135,10 @@ func setup(p_rule_id: String, p_controller) -> void:
 			)
 		header.add_child(_side_switch)
 
-	var copy_button = IconButtonRes.new()
-	copy_button.setup("copy", "Duplicate this rule and its inputs.")
-	copy_button.pressed.connect(_on_copy_pressed)
-	header.add_child(copy_button)
+	_copy_button = IconButtonRes.new()
+	_copy_button.setup("copy", "Duplicate this rule and its inputs.", true)
+	_copy_button.pressed.connect(_on_copy_pressed)
+	header.add_child(_copy_button)
 
 	_overlay = Control.new()
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -170,14 +171,14 @@ func setup(p_rule_id: String, p_controller) -> void:
 		_overlay.add_child(_corner_side_switch)
 
 	_corner_copy = IconButtonRes.new()
-	_corner_copy.setup("copy", "Duplicate this rule and its inputs.")
+	_corner_copy.setup("copy", "Duplicate this rule and its inputs.", true)
 	_corner_copy.pressed.connect(_on_copy_pressed)
 	_corner_copy.anchor_left = 1.0
 	_corner_copy.anchor_right = 1.0
 	_corner_copy.offset_left = -36.0
 	_corner_copy.offset_top = 6.0
 	_corner_copy.offset_right = -6.0
-	_corner_copy.offset_bottom = 36.0
+	_corner_copy.offset_bottom = 32.0
 	_overlay.add_child(_corner_copy)
 	_apply_mode_geometry()
 
@@ -264,7 +265,7 @@ func _apply_mode_geometry() -> void:
 		_corner_copy.offset_left = -36.0
 		_corner_copy.offset_top = 0.0
 		_corner_copy.offset_right = -6.0
-		_corner_copy.offset_bottom = 30.0
+		_corner_copy.offset_bottom = 26.0
 	if _corner_warning != null:
 		_corner_warning.visible = compact and state == State.ERROR
 		_corner_warning.position = Vector2(6.0, 32.0 if _is_switchable() else 0.0)

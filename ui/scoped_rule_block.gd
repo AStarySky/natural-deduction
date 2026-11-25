@@ -362,9 +362,8 @@ func _rebuild_binder_rows() -> void:
 			var group: int = candidate.get_assumption_group()
 			var button := Button.new()
 			button.text = candidate.get_result_formula().to_display_string()
-			button.custom_minimum_size = Vector2(70, 26)
-			button.add_theme_font_size_override("font_size", 10)
-			UiStyle.style_button(
+			button.custom_minimum_size = Vector2(70, UiStyle.BLOCK_CONTROL_HEIGHT)
+			UiStyle.style_block_button(
 				button,
 				UiStyle.valid_color() if group == int(_binder_slots[slot]) else UiStyle.lavender(),
 				10

@@ -17,7 +17,7 @@ func setup(initial_side: int, left_text: String = "L", right_text: String = "R")
 	side = clampi(initial_side, 0, 1)
 	_left_text = left_text
 	_right_text = right_text
-	custom_minimum_size = Vector2(58, 26)
+	custom_minimum_size = Vector2(58, UiStyle.BLOCK_CONTROL_HEIGHT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	tooltip_text = "Click to switch between L and R."
@@ -52,17 +52,23 @@ func _gui_input(event: InputEvent) -> void:
 				changed.emit(side)
 			_pressed = false
 
+func _track_style(fill: Color) -> StyleBoxFlat:
+	return UiStyle.block_control_style(fill)
+
+func _knob_style(fill: Color) -> StyleBoxFlat:
+	return UiStyle.panel_style(fill, UiStyle.border_color(), 8, 2, false)
+
 func _draw() -> void:
 	if size.x < 8.0 or size.y < 8.0:
 		return
 	var track_fill := UiStyle.cream().lightened(0.12) if _hovered else UiStyle.cream()
-	var track := UiStyle.panel_style(track_fill, UiStyle.border_color(), 12, 2, false)
+	var track := _track_style(track_fill)
 	draw_style_box(track, Rect2(Vector2.ZERO, size))
 
 	var knob_width := (size.x - 6.0) * 0.5
 	var knob_x := 3.0 + knob_width * float(side)
 	var knob_fill := UiStyle.coral().lightened(0.08) if _hovered else UiStyle.coral()
-	var knob := UiStyle.panel_style(knob_fill, UiStyle.border_color(), 9, 2, false)
+	var knob := _knob_style(knob_fill)
 	draw_style_box(knob, Rect2(Vector2(knob_x, 3.0), Vector2(knob_width, size.y - 6.0)))
 
 	var font := UiStyle.display_font(800)

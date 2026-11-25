@@ -30,9 +30,9 @@ func _customize_open_button() -> void:
 	# header row as the status dot, so no right gutter can unbalance the card.
 	_open_button = Button.new()
 	_open_button.text = "OPEN"
-	_open_button.custom_minimum_size = Vector2(44, 20)
+	_open_button.custom_minimum_size = Vector2(52, UiStyle.BLOCK_CONTROL_HEIGHT)
 	_open_button.tooltip_text = "Reopen this assumption window."
-	UiStyle.style_button(_open_button, scope_color, 9)
+	UiStyle.style_block_button(_open_button, scope_color, 14)
 	_open_button.pressed.connect(_on_open)
 	if _header != null:
 		_header.add_theme_constant_override("separation", 4)
