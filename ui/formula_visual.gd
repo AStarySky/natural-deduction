@@ -35,6 +35,17 @@ func setup(formula, token_size: int = 18, font_size: int = 11) -> void:
 	_formula = formula
 	_rebuild()
 
+## Change only the visual scale and rebuild the token row. Used by formula
+## leaf cards when the Compact/Comfort density changes at runtime.
+func set_metrics(token_size: int, font_size: int, min_height: float = 0.0) -> void:
+	if min_height > 0.0:
+		custom_minimum_size.y = min_height
+	if token_size == _token_size and font_size == _font_size:
+		return
+	_token_size = token_size
+	_font_size = font_size
+	_rebuild()
+
 func set_formula(formula) -> void:
 	if _formula != null and formula != null and _formula.equals(formula):
 		return

@@ -6,6 +6,7 @@ var music_slider: HSlider = null
 var sfx_slider: HSlider = null
 var mute_button: Button = null
 var fullscreen_button: Button = null
+var card_size_button: Button = null
 var _music_value: Label = null
 var _sfx_value: Label = null
 
@@ -35,6 +36,20 @@ func _build_body(body: VBoxContainer) -> void:
 	var sfx_row := _add_slider_row(body, "SFX", sfx, _on_sfx_changed)
 	sfx_slider = sfx_row["slider"]
 	_sfx_value = sfx_row["value"]
+
+	body.add_child(
+		UiStyle.make_display_label("CARDS", 11, UiStyle.muted_text())
+	)
+	var card_row := HBoxContainer.new()
+	card_row.add_theme_constant_override("separation", 10)
+	card_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body.add_child(card_row)
+	var card_label := UiStyle.make_display_label("CARD SIZE", 13, UiStyle.text_color())
+	card_label.custom_minimum_size = Vector2(84, 0)
+	card_row.add_child(card_label)
+	card_size_button = _make_action_button("CARD: COMPACT", UiStyle.sky(), 14, 230)
+	card_size_button.pressed.connect(_on_card_size)
+	card_row.add_child(card_size_button)
 
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 10)
@@ -70,6 +85,7 @@ func _build_body(body: VBoxContainer) -> void:
 
 	_sync_mute()
 	_sync_fullscreen()
+	_sync_card_size()
 	_add_footer(body, "DONE")
 
 func _add_slider_row(
@@ -111,6 +127,36 @@ func _add_slider_row(
 		callback.call(next)
 	)
 	return {"slider": slider, "value": value}
+
+func _on_card_size() -> void:
+	if controller == null:
+		return
+	var current := "compact"
+	if controller.has_method("get_card_size_mode"):
+		current = str(controller.get_card_size_mode())
+	var next := "comfort" if current == "compact" else "compact"
+	if controller.has_method("set_card_size_mode"):
+		controller.set_card_size_mode(next)
+	_sync_card_size()
+
+func _sync_card_size() -> void:
+	if card_size_button == null:
+		return
+	var mode := "compact"
+	if controller != null and controller.has_method("get_card_size_mode"):
+		mode = str(controller.get_card_size_mode())
+	var compact := mode == "compact"
+	card_size_button.text = "CARD: COMPACT" if compact else "CARD: COMFORT"
+	card_size_button.tooltip_text = (
+		"Compact formula cards. Click for the original Comfort size."
+		if compact
+		else "Original formula card size. Click for Compact."
+	)
+	UiStyle.style_button(
+		card_size_button,
+		UiStyle.sky() if compact else UiStyle.lavender(),
+		14
+	)
 
 func _on_music_changed(value: float) -> void:
 	if controller != null and controller.has_method("set_music_volume"):

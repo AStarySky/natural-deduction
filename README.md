@@ -47,6 +47,7 @@
 | 检查目标 | `Enter`：检查当前画布上最后一个根规则块 |
 | 静音 | `M`（同时静音 BGM 与音效） |
 | 全屏 | 桌面版默认全屏启动；`F11` 切换全屏/窗口；标题页 Settings 里也有开关 |
+| 卡片尺寸 | 标题页 Settings 可在 Compact 与 Comfort 公式卡之间切换；默认 Compact |
 | 音量 | 点击右上角喇叭静音；右键打开总音量滑条（BGM + SFX） |
 | 标题页菜单 | **CREDITS** 查看素材授权；**SETTINGS** 分别调整 Music / SFX、静音和全屏 |
 
@@ -167,6 +168,7 @@ $GODOT --headless --path . -s res://tests/run_curriculum.gd     # 61 关解法�
 $GODOT --headless --path . -s res://tests/run_progress.gd       # 顺序解锁与进度持久化
 $GODOT --headless --path . -s res://tests/run_ui_model.gd       # UI 模型与场景 drop
 $GODOT --headless --path . -s res://tests/run_ui_contracts.gd   # 61 关加载与 UI 工厂契约
+$GODOT --headless --path . -s res://tests/run_ui_layout.gd      # Compact/Comfort 公式卡尺寸
 $GODOT --headless --path . -s res://tests/run_scope_limits.gd   # 五层 Assume 深度/关闭/Undo
 $GODOT --headless --path . -s res://tests/run_ui_scoped.gd      # 假设浮窗与作用域卡
 $GODOT --headless --path . -s res://tests/run_chapter_ui.gd     # 章节页/规则架/ASSUME 解锁
@@ -189,13 +191,14 @@ $GODOT --headless --path . -s res://tests/run_title_idle.gd     # 标题页/弹�
 | `run_progress` | 40 | 0 |
 | `run_ui_model` | 103 | 0 |
 | `run_ui_contracts` | 966 | 0 |
+| `run_ui_layout` | 27 | 0 |
 | `run_scope_limits` | 23 | 0 |
 | `run_ui_scoped` | 195 | 0 |
 | `run_chapter_ui` | 43 | 0 |
 | `run_shortcuts` | 35 | 0 |
 | `run_formula_builder` | 22 | 0 |
 | `run_audio_smoke` | 943 | 0 |
-| `run_title_idle` | 44 | 0 |
+| `run_title_idle` | 47 | 0 |
 
 在编辑器内运行 CLI 验收：打开 `tests/run_cli_script_editor.gd`，使用 **File > Run**；它会以子进程方式调用上面的无头 runner。
 
@@ -288,7 +291,7 @@ ui/main.gd                 页面/拖拽/浮窗/构建器总控制器
 ui/title_page.gd           标题页、四张规则卡与 Credits/Settings 入口
 ui/title_modal.gd          Credits/Settings 共用的纸质弹窗外壳
 ui/credits_modal.gd        标题页 Credits（音乐/音效/字体授权）
-ui/settings_modal.gd       标题页设置（Music/SFX/静音/全屏）
+ui/settings_modal.gd       标题页设置（Music/SFX/静音/全屏/卡片尺寸）
 ui/level_bank.gd           7 章、61 关的课程、规则解锁与关卡数据
 ui/progress_store.gd       顺序解锁、挑战状态与 user:// 进度持久化
 ui/chapter_tab.gd          章节标签（进度/锁定/选中）

@@ -23,6 +23,7 @@ func _has_text(node: Node, needle: String) -> bool:
 func _run() -> void:
 	var main = load("res://ui/main.tscn").instantiate()
 	main.progress_path = ""
+	main.settings_path = ""
 	root.add_child(main)
 	await process_frame
 	await process_frame
@@ -120,6 +121,12 @@ func _run() -> void:
 	_check(settings.sfx_slider != null, "settings has an SFX slider")
 	_check(settings.mute_button != null, "settings has a mute button")
 	_check(settings.fullscreen_button != null, "desktop settings has a fullscreen button")
+	_check(settings.card_size_button != null, "settings has a card-size button")
+	var card_mode_before: String = main.get_card_size_mode()
+	settings.card_size_button.pressed.emit()
+	_check(main.get_card_size_mode() != card_mode_before, "card-size button toggles the mode")
+	settings.card_size_button.pressed.emit()
+	_check(main.get_card_size_mode() == card_mode_before, "card-size button toggles back")
 	settings.music_slider.value = 0.3
 	_check(
 		is_equal_approx(main.get_music_volume(), 0.3),

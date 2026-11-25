@@ -27,6 +27,8 @@ const SfxRes = preload("res://audio/sfx.gd")
 const MusicRes = preload("res://audio/music.gd")
 const SoundControlRes = preload("res://ui/sound_control.gd")
 const ProgressStoreRes = preload("res://ui/progress_store.gd")
+const UiSettingsStoreRes = preload("res://ui/ui_settings_store.gd")
+const CardMetrics = preload("res://ui/card_metrics.gd")
 const RuleIntroCardRes = preload("res://ui/rule_intro_card.gd")
 
 ## Empty inputs start welcoming a dragged block from this many screen pixels away.
@@ -79,6 +81,8 @@ var _current_chapter_id := ""
 var _current_level_pos := -1
 var _progress = null
 var progress_path := "user://progress.cfg"
+var settings_path := "user://ui_settings.cfg"
+var _ui_settings = null
 var _rule_intro = null
 var _scope_check_hint = null
 
@@ -142,12 +146,28 @@ var _suppress_rule_feedback := false
 var _goal_user_action := false
 
 func _ready() -> void:
+	_ui_settings = UiSettingsStoreRes.new(settings_path)
 	_progress = ProgressStoreRes.new(progress_path)
 	set_process_input(true)
 	_setup_audio()
 	_build_pages()
 	_show_title()
 	_setup_sound_control()
+
+## Presentation-only card density. This never touches proof state or Undo.
+func get_card_size_mode() -> String:
+	if _ui_settings == null:
+		return CardMetrics.DEFAULT
+	return CardMetrics.normalize(str(_ui_settings.card_size_mode))
+
+func set_card_size_mode(mode: String) -> void:
+	if _ui_settings == null:
+		return
+	var normalized := CardMetrics.normalize(mode)
+	if normalized == _ui_settings.card_size_mode:
+		return
+	_ui_settings.set_card_size_mode(normalized)
+	get_tree().call_group("nd_formula_card", "apply_card_size_mode", normalized)
 
 func _setup_audio() -> void:
 	if DisplayServer.get_name() == "headless":

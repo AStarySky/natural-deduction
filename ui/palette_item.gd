@@ -10,6 +10,7 @@ const RuleIconRes = preload("res://ui/rule_icon.gd")
 const RuleMetaRes = preload("res://ui/rule_meta.gd")
 const RulesRes = preload("res://logic/rules.gd")
 const UiStyle = preload("res://ui/ui_style.gd")
+const CardMetrics = preload("res://ui/card_metrics.gd")
 
 var spawn_kind: String = ""
 var rule_id: String = ""
@@ -27,6 +28,18 @@ var _is_rule_card: bool = false
 var _base_rotation: float = 0.0
 var _rest_position := Vector2.ZERO
 var _hover_tween: Tween = null
+var _is_formula_tile := false
+var _is_assumption_tile := false
+var _mode := CardMetrics.DEFAULT
+var _overlay: Control = null
+var _margin: MarginContainer = null
+var _box: VBoxContainer = null
+var _header: HBoxContainer = null
+var _formula_badge: Panel = null
+var _formula_tag: Label = null
+var _formula_visual = null
+var _corner_badge: Panel = null
+var _corner_tag: Label = null
 
 ## Square icon tile for a rule palette entry. A positive shortcut gets a small
 ## number badge in the top-right corner.
@@ -197,43 +210,16 @@ func setup_premise(p_formula: FormulaRes) -> void:
 	assumption_group = 0
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_DRAG
-	custom_minimum_size = Vector2(80, 84)
-	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	tooltip_text = p_formula.to_display_string() + "\nPremise: drag into a rule input."
-	add_theme_stylebox_override("panel", UiStyle.empty_style())
-	_paper = CardWearRes.apply_to(self, hash(p_formula.to_display_string()), UiStyle.cream())
-
-	var content := MarginContainer.new()
-	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.add_theme_constant_override("margin_left", 9)
-	content.add_theme_constant_override("margin_top", 8)
-	content.add_theme_constant_override("margin_right", 9)
-	content.add_theme_constant_override("margin_bottom", 8)
-	add_child(content)
-
-	var box := VBoxContainer.new()
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_theme_constant_override("separation", 2)
-	content.add_child(box)
-
-	var header := HBoxContainer.new()
-	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_child(header)
-	var badge := Panel.new()
-	badge.custom_minimum_size = Vector2(10, 10)
-	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	badge.add_theme_stylebox_override(
-		"panel",
-		UiStyle.panel_style(UiStyle.accent(), UiStyle.border_color(), 5, 1, false)
+	_mode = _resolve_formula_mode()
+	add_to_group("nd_formula_card")
+	_is_formula_tile = true
+	_is_assumption_tile = false
+	_build_formula_tile(
+		p_formula,
+		UiStyle.cream(),
+		hash(p_formula.to_display_string())
 	)
-	header.add_child(badge)
-
-	var visual = FormulaVisualRes.new()
-	visual.setup(p_formula, 28, 14)
-	visual.custom_minimum_size = Vector2(0, 44)
-	visual.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	visual.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	box.add_child(visual)
 
 ## Scoped hypothesis source. It spawns an AssumptionBlock in the same group,
 ## so every copy can be discharged together.
@@ -244,57 +230,148 @@ func setup_assumption(p_formula: FormulaRes, p_group: int, tint: Color = Color8(
 	assumption_color = tint
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_DRAG
-	custom_minimum_size = Vector2(80, 84)
-	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	tooltip_text = p_formula.to_display_string() + "
-Assumption in this scope: drag into the sub-world canvas."
-	add_theme_stylebox_override("panel", UiStyle.empty_style())
-	_paper = CardWearRes.apply_to(
-		self,
-		hash(p_formula.to_display_string() + ":assume:" + str(p_group)),
-		tint
-	)
+	tooltip_text = p_formula.to_display_string() + "\nAssumption in this scope: drag into the sub-world canvas."
+	_mode = _resolve_formula_mode()
+	add_to_group("nd_formula_card")
+	_is_formula_tile = true
+	_is_assumption_tile = true
 	_is_rule_card = false
-	_base_rotation = rotation
 	mouse_entered.connect(_on_hover.bind(true))
 	mouse_exited.connect(_on_hover.bind(false))
-
-	var content := MarginContainer.new()
-	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.add_theme_constant_override("margin_left", 9)
-	content.add_theme_constant_override("margin_top", 8)
-	content.add_theme_constant_override("margin_right", 9)
-	content.add_theme_constant_override("margin_bottom", 8)
-	add_child(content)
-
-	var box := VBoxContainer.new()
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_theme_constant_override("separation", 2)
-	content.add_child(box)
-
-	var header := HBoxContainer.new()
-	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	header.add_theme_constant_override("separation", 3)
-	box.add_child(header)
-	var badge := Panel.new()
-	badge.custom_minimum_size = Vector2(10, 10)
-	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	badge.add_theme_stylebox_override(
-		"panel",
-		UiStyle.panel_style(tint, UiStyle.border_color(), 5, 1, false)
+	_build_formula_tile(
+		p_formula,
+		tint,
+		hash(p_formula.to_display_string() + ":assume:" + str(p_group))
 	)
-	header.add_child(badge)
-	var tag := UiStyle.make_display_label("ASSUME", 9, UiStyle.muted_text())
-	tag.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	header.add_child(tag)
 
-	var visual = FormulaVisualRes.new()
-	visual.setup(p_formula, 28, 14)
-	visual.custom_minimum_size = Vector2(0, 44)
-	visual.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	visual.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	box.add_child(visual)
+func _resolve_formula_mode() -> String:
+	if controller != null and controller.has_method("get_card_size_mode"):
+		return CardMetrics.normalize(str(controller.get_card_size_mode()))
+	return CardMetrics.DEFAULT
+
+func _build_formula_tile(p_formula: FormulaRes, fill: Color, seed_value: int) -> void:
+	var metrics := CardMetrics.palette_assumption(_mode) if _is_assumption_tile else CardMetrics.palette_formula(_mode)
+	custom_minimum_size = metrics["min_size"]
+	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	add_theme_stylebox_override("panel", UiStyle.empty_style())
+	_paper = CardWearRes.apply_to(self, seed_value, fill)
+	_base_rotation = rotation
+
+	_margin = MarginContainer.new()
+	_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_margin)
+	_box = VBoxContainer.new()
+	_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_box.add_theme_constant_override("separation", int(metrics["separation"]))
+	_margin.add_child(_box)
+
+	_overlay = Control.new()
+	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(_overlay)
+
+	_header = HBoxContainer.new()
+	_header.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_header.add_theme_constant_override("separation", int(metrics.get("header_separation", 0)))
+	_box.add_child(_header)
+	_formula_badge = Panel.new()
+	_formula_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_header.add_child(_formula_badge)
+	if _is_assumption_tile:
+		_formula_tag = UiStyle.make_display_label("ASSUME", int(metrics.get("tag_font_size", 9)), UiStyle.muted_text())
+		_formula_tag.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_formula_tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_header.add_child(_formula_tag)
+	else:
+		var spacer := Control.new()
+		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_header.add_child(spacer)
+
+	_corner_badge = Panel.new()
+	_corner_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_overlay.add_child(_corner_badge)
+	if _is_assumption_tile:
+		_corner_tag = UiStyle.make_display_label("ASSUME", int(metrics.get("tag_font_size", 9)), UiStyle.muted_text())
+		_corner_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_overlay.add_child(_corner_tag)
+
+	_formula_visual = FormulaVisualRes.new()
+	_formula_visual.setup(p_formula, int(metrics["token_size"]), int(metrics["font_size"]))
+	_formula_visual.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_formula_visual.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_box.add_child(_formula_visual)
+
+	_apply_formula_geometry()
+	_refresh_formula_badge()
+
+func apply_card_size_mode(mode: String) -> void:
+	if not _is_formula_tile:
+		return
+	var normalized := CardMetrics.normalize(mode)
+	if normalized == _mode:
+		return
+	_mode = normalized
+	_apply_formula_geometry()
+	_refresh_formula_badge()
+	update_minimum_size()
+	reset_size()
+
+func _apply_formula_geometry() -> void:
+	var metrics := CardMetrics.palette_assumption(_mode) if _is_assumption_tile else CardMetrics.palette_formula(_mode)
+	custom_minimum_size = metrics["min_size"]
+	if _box != null:
+		_box.add_theme_constant_override("separation", int(metrics["separation"]))
+	if _header != null:
+		_header.visible = bool(metrics["show_header"])
+	if _margin != null:
+		var side := int(metrics["margin_side"])
+		var top := int(metrics["margin_top"])
+		_margin.add_theme_constant_override("margin_left", side)
+		_margin.add_theme_constant_override("margin_top", top)
+		_margin.add_theme_constant_override("margin_right", side)
+		_margin.add_theme_constant_override("margin_bottom", top)
+	var compact := not bool(metrics["show_header"])
+	if _formula_badge != null:
+		_formula_badge.custom_minimum_size = Vector2(float(metrics["badge_size"]), float(metrics["badge_size"]))
+	if _corner_badge != null:
+		_corner_badge.visible = compact
+		_corner_badge.custom_minimum_size = Vector2(float(metrics["badge_size"]), float(metrics["badge_size"]))
+		_corner_badge.position = Vector2(float(metrics["corner_inset"]), float(metrics["corner_inset"]))
+		_corner_badge.size = Vector2(float(metrics["badge_size"]), float(metrics["badge_size"]))
+	if _formula_tag != null:
+		_formula_tag.add_theme_font_size_override("font_size", int(metrics.get("tag_font_size", 9)))
+	if _corner_tag != null:
+		_corner_tag.visible = compact
+		_corner_tag.add_theme_font_size_override("font_size", int(metrics.get("tag_font_size", 9)))
+		_corner_tag.position = Vector2(float(metrics["corner_inset"]) + float(metrics["badge_size"]) + 4.0, float(metrics["corner_inset"]))
+	if _formula_visual != null:
+		_formula_visual.set_metrics(
+			int(metrics["token_size"]),
+			int(metrics["font_size"]),
+			float(metrics["visual_min_height"])
+		)
+
+func _refresh_formula_badge() -> void:
+	if not _is_formula_tile:
+		return
+	var metrics := CardMetrics.palette_assumption(_mode) if _is_assumption_tile else CardMetrics.palette_formula(_mode)
+	var color := UiStyle.accent() if not _is_assumption_tile else assumption_color
+	for badge in [_formula_badge, _corner_badge]:
+		if badge == null:
+			continue
+		var box := UiStyle.panel_style(
+			color,
+			UiStyle.border_color(),
+			int(metrics["badge_radius"]),
+			1,
+			false
+		)
+		box.content_margin_left = 0.0
+		box.content_margin_top = 0.0
+		box.content_margin_right = 0.0
+		box.content_margin_bottom = 0.0
+		badge.add_theme_stylebox_override("panel", box)
 
 ## Press-and-drag creates the real block immediately; it follows the mouse.
 func _gui_input(event: InputEvent) -> void:
