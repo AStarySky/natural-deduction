@@ -43,6 +43,7 @@
 | 输入公式 | Formula Builder 中直接键盘输入（无输入框），预览区实时显示识别后的公式；`Enter` 提交，`Esc` 取消 |
 | 快速规则 | 数字键 `1–9`：生成当前规则架对应编号的规则卡 |
 | 快速假设 | `A`：打开 ASSUME（仅第二章及以后） |
+| 编辑假设 | 最大化 Assume 窗口后点 `EDIT`；同组的所有假设副本同步改成新公式 |
 | L/R 开关 | 点击一次切换，不需要点对应半边 |
 | 检查目标 | `Enter`：检查当前画布上最后一个根规则块 |
 | 静音 | `M`（同时静音 BGM 与音效） |
@@ -193,7 +194,7 @@ $GODOT --headless --path . -s res://tests/run_title_idle.gd     # 标题页/弹�
 | `run_ui_contracts` | 966 | 0 |
 | `run_ui_layout` | 34 | 0 |
 | `run_scope_limits` | 23 | 0 |
-| `run_ui_scoped` | 197 | 0 |
+| `run_ui_scoped` | 211 | 0 |
 | `run_chapter_ui` | 43 | 0 |
 | `run_shortcuts` | 35 | 0 |
 | `run_formula_builder` | 22 | 0 |

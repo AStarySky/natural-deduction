@@ -1089,4 +1089,118 @@ func _run() -> void:
 		"Premises returns to its base position after scopes close"
 	)
 
+	# Editing a maximized assumption rewrites every copy in its group.
+	main.open_level_by_id("ch2-3")
+	await process_frame
+	main._close_rule_intro()
+	main.open_scope_for_formula(_f("P"))
+	await process_frame
+	await process_frame
+	var edit_record = main._scope_open[-1]
+	var edit_window = edit_record["window"]
+	_check(not edit_window._edit_button.visible, "EDIT is hidden before maximizing")
+	main.maximize_scope_window(edit_window)
+	await process_frame
+	await process_frame
+	_check(edit_window._edit_button.visible, "EDIT appears after maximizing")
+	var edit_assumption = main.create_assumption_block(_f("P"), int(edit_record["group"]))
+	edit_record["inner_canvas"].add_child(edit_assumption)
+	edit_assumption.reset_size()
+	edit_assumption.refresh()
+	var edit_assumption_copy = main.duplicate_block(edit_assumption)
+	if edit_assumption_copy != null:
+		edit_record["inner_canvas"].add_child(edit_assumption_copy)
+		edit_assumption_copy.reset_size()
+		edit_assumption_copy.refresh()
+	await process_frame
+	edit_window._edit_button.pressed.emit()
+	await process_frame
+	_check(main._formula_builder != null, "EDIT opens Formula Builder")
+	if main._formula_builder != null:
+		_check(main._formula_builder._input_text == "P", "EDIT starts with the current formula")
+		main._formula_builder._input_text = "A & B"
+		main._formula_builder._refresh_preview()
+		main._formula_builder._on_done()
+		await process_frame
+	_check(edit_record["formula"].to_string() == "A & B", "edited assumption updates its record")
+	_check(
+		edit_assumption.get_result_formula().to_string() == "A & B",
+		"edited assumption updates existing assumption blocks"
+	)
+	if edit_assumption_copy != null:
+		_check(
+			edit_assumption_copy.get_result_formula().to_string() == "A & B",
+			"edited assumption updates copies in the same group"
+		)
+	_check(edit_window._title_label.text == "ASSUME A & B", "edited assumption updates the window title")
+	main.finish_scope_window(edit_window)
+	await process_frame
+	var edit_marker = edit_record["marker"]
+	_check(
+		edit_marker != null
+		and edit_marker.get_result_formula().to_string() == "A & B -> A & B",
+		"edited P -> P becomes A & B -> A & B"
+	)
+	if edit_marker != null:
+		_check(
+			ProofAdapterRes.validate(edit_marker, _f("A & B -> A & B")).ok,
+			"edited assumption marker validates"
+		)
+	main._close_all_scope_windows()
+	await process_frame
+
+	# Editing a structurally dependent proof must invalidate it, not silently
+	# manufacture a new conclusion.
+	main.open_level_by_id("ch2-3")
+	await process_frame
+	main._close_rule_intro()
+	main.open_scope_for_formula(_f("A & B"))
+	await process_frame
+	await process_frame
+	var invalid_record = main._scope_open[-1]
+	var invalid_hypothesis = main.create_assumption_block(_f("A & B"), int(invalid_record["group"]))
+	invalid_record["inner_canvas"].add_child(invalid_hypothesis)
+	invalid_hypothesis.reset_size()
+	var split_rule = main.create_rule_block("and_elim_left")
+	invalid_record["inner_canvas"].add_child(split_rule)
+	split_rule.reset_size()
+	split_rule.sockets[0].attach_block(invalid_hypothesis, false)
+	split_rule.refresh()
+	main.finish_scope_window(invalid_record["window"])
+	await process_frame
+	var invalid_marker = invalid_record.get("marker")
+	_check(
+		invalid_marker != null
+		and invalid_marker.get_result_formula().to_string() == "A & B -> A",
+		"invalid-edit setup derives A & B -> A"
+	)
+	if invalid_marker != null:
+		main.open_scope_marker(invalid_marker)
+		await process_frame
+		var reopened_record = main._scope_open[-1]
+		main.maximize_scope_window(reopened_record["window"])
+		await process_frame
+		await process_frame
+		reopened_record["window"]._edit_button.pressed.emit()
+		await process_frame
+		if main._formula_builder != null:
+			main._formula_builder._input_text = "P"
+			main._formula_builder._refresh_preview()
+			main._formula_builder._on_done()
+			await process_frame
+		_check(
+			invalid_hypothesis.get_result_formula().to_string() == "P",
+			"invalidating edit changes the hypothesis to P"
+		)
+		_check(
+			split_rule.get_result_formula() == null,
+			"and_elim becomes invalid after A & B is edited to P"
+		)
+		_check(
+			invalid_marker.get_result_formula() == null,
+			"invalidating edit produces no conclusion"
+		)
+		main._close_all_scope_windows()
+		await process_frame
+
 	main.queue_free()

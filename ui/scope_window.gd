@@ -21,6 +21,8 @@ var nested_window: bool = false
 
 var _title_bar: PanelContainer = null
 var _status: Label = null
+var _title_label: Label = null
+var _edit_button: Button = null
 var _window_dots = null
 var _drag_active := false
 var _drag_offset := Vector2.ZERO
@@ -72,9 +74,18 @@ func setup_window(p_controller, formula: FormulaRes, group: int, tint: Color = C
 	_window_dots.minimize_requested.connect(_on_done)
 	title_row.add_child(_window_dots)
 
-	var title := UiStyle.make_display_label("ASSUME " + formula.to_display_string(), 15, UiStyle.text_color())
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title_row.add_child(title)
+	_title_label = UiStyle.make_display_label("ASSUME " + formula.to_display_string(), 15, UiStyle.text_color())
+	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_row.add_child(_title_label)
+
+	_edit_button = Button.new()
+	_edit_button.text = "EDIT"
+	_edit_button.custom_minimum_size = Vector2(52, 20)
+	_edit_button.tooltip_text = "Edit this assumption and all of its copies."
+	UiStyle.style_button(_edit_button, tint, 9)
+	_edit_button.visible = false
+	_edit_button.pressed.connect(_on_edit)
+	title_row.add_child(_edit_button)
 
 	_status = UiStyle.make_display_label("", 10, UiStyle.muted_text())
 	_status.custom_minimum_size = Vector2(130, 18)
@@ -298,6 +309,17 @@ func _on_toggle_size() -> void:
 func _refresh_window_controls(maximized: bool) -> void:
 	if _window_dots != null:
 		_window_dots.set_maximized(maximized)
+	if _edit_button != null:
+		_edit_button.visible = maximized
+
+func set_assumption_formula(formula: FormulaRes) -> void:
+	assumption_formula = formula
+	if _title_label != null and formula != null:
+		_title_label.text = "ASSUME " + formula.to_display_string()
+
+func _on_edit() -> void:
+	if controller != null and controller.has_method("edit_scope_assumption"):
+		controller.edit_scope_assumption(self)
 
 func get_title_bar():
 	return _title_bar

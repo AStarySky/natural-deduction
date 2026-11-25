@@ -223,6 +223,19 @@ func setup_premise(p_formula: FormulaRes) -> void:
 
 ## Scoped hypothesis source. It spawns an AssumptionBlock in the same group,
 ## so every copy can be discharged together.
+func set_assumption_formula(p_formula: FormulaRes) -> void:
+	if not _is_formula_tile:
+		return
+	formula = p_formula
+	if _formula_visual != null:
+		_formula_visual.set_formula(p_formula)
+	_apply_formula_geometry()
+	_refresh_formula_badge()
+	tooltip_text = p_formula.to_display_string() + "
+Assumption in this scope: drag into the sub-world canvas."
+	update_minimum_size()
+	reset_size()
+
 func setup_assumption(p_formula: FormulaRes, p_group: int, tint: Color = Color8(244, 219, 255)) -> void:
 	spawn_kind = "spawn_assumption"
 	formula = p_formula

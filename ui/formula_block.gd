@@ -133,6 +133,22 @@ func _apply_mode_geometry() -> void:
 	if _tab != null:
 		_tab.custom_minimum_size = metrics["tab_size"]
 
+## Replace the displayed formula in place (used by assumption editing).
+func set_formula_value(p_formula: FormulaRes) -> void:
+	formula = p_formula
+	if _visual != null:
+		_visual.set_formula(formula)
+	tooltip_text = (
+		formula.to_display_string() + "
+Premise"
+		if formula != null
+		else "Premise"
+	)
+	_apply_mode_geometry()
+	refresh_visuals()
+	update_minimum_size()
+	reset_size()
+
 func get_result_formula():
 	return formula
 

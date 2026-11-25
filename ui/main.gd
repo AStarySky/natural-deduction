@@ -100,6 +100,7 @@ var _formula_builder = null
 var _formula_builder_target = null
 var _formula_builder_action := ""
 var _formula_builder_committed := false
+var _formula_builder_scope_record = null
 var _next_assumption_group := 1
 var _scope_layer: Control = null
 var _scope_open: Array = []
@@ -450,7 +451,22 @@ func open_assumption_builder() -> void:
 	if _modal_layer == null or _formula_builder != null:
 		return
 	_formula_builder_target = null
+	_formula_builder_scope_record = null
 	_formula_builder_action = "assumption"
+	_open_formula_builder_modal()
+
+## Edit the hypothesis behind a maximized Assume window and all of its copies.
+func edit_scope_assumption(window) -> void:
+	if window == null or not is_instance_valid(window):
+		return
+	var record = window.scope_record
+	if record == null:
+		return
+	if _game_page == null or not _game_page.visible or _formula_builder != null:
+		return
+	_formula_builder_target = null
+	_formula_builder_scope_record = record
+	_formula_builder_action = "edit_assumption"
 	_open_formula_builder_modal()
 
 func _open_formula_builder_modal() -> void:
@@ -458,6 +474,10 @@ func _open_formula_builder_modal() -> void:
 	play_sfx("builder_open")
 	_formula_builder = FormulaBuilderRes.new()
 	_formula_builder.setup(_current_level_atoms())
+	if _formula_builder_action == "edit_assumption" and _formula_builder_scope_record != null:
+		var current_formula = _formula_builder_scope_record.get("formula")
+		if current_formula != null:
+			_formula_builder.set_initial_text(current_formula.to_display_string())
 	_formula_builder.submitted.connect(_on_formula_builder_submitted)
 	_formula_builder.cancelled.connect(func() -> void: _close_formula_builder(true))
 	_formula_builder.button_clicked.connect(func() -> void: play_sfx("button_click"))
@@ -484,6 +504,7 @@ func _on_builder_key_back() -> void:
 func _on_formula_builder_submitted(formula) -> void:
 	var target = _formula_builder_target
 	var action := _formula_builder_action
+	var edit_record = _formula_builder_scope_record
 	_formula_builder_committed = true
 	if action != "assumption":
 		play_sfx("confirm_two")
@@ -491,9 +512,65 @@ func _on_formula_builder_submitted(formula) -> void:
 	if action == "assumption":
 		_create_assumption_on_canvas(formula)
 		return
+	if action == "edit_assumption":
+		if edit_record != null:
+			_apply_assumption_edit(edit_record, formula)
+		return
 	if target != null and is_instance_valid(target):
 		_push_undo_snapshot()
 		target.set_extra_formula(formula)
+
+func _apply_assumption_edit(record: Dictionary, new_formula) -> void:
+	if record == null or new_formula == null:
+		return
+	var old_formula = record.get("formula")
+	if old_formula != null and old_formula.equals(new_formula):
+		return
+	_undo_stack.append({
+		"kind": "assumption_edit",
+		"record": record,
+		"old_formula": old_formula,
+		"new_formula": new_formula,
+	})
+	while _undo_stack.size() > UNDO_LIMIT:
+		var old = _undo_stack.pop_front()
+		_free_snapshot(old)
+	_update_undo_button()
+	_apply_assumption_formula(record, new_formula)
+
+func _apply_assumption_formula(record: Dictionary, new_formula) -> void:
+	if record == null or new_formula == null:
+		return
+	var group := int(record.get("group", -1))
+	record["formula"] = new_formula
+	var window = record.get("window")
+	if window != null and is_instance_valid(window) and window.has_method("set_assumption_formula"):
+		window.set_assumption_formula(new_formula)
+	var premise_item = record.get("premise_item")
+	if premise_item != null and is_instance_valid(premise_item) and premise_item.has_method("set_assumption_formula"):
+		premise_item.set_assumption_formula(new_formula)
+	for node in get_tree().get_nodes_in_group("nd_formula_card"):
+		if node == null or not is_instance_valid(node):
+			continue
+		if node.has_method("is_assumption_block") and node.is_assumption_block():
+			if int(node.get_assumption_group()) == group and node.has_method("set_formula_value"):
+				node.set_formula_value(new_formula)
+		elif node.has_method("is_scope_block") and node.is_scope_block():
+			if int(node.get_assumption_group()) == group and node.has_method("set_assumption_formula"):
+				node.set_assumption_formula(new_formula)
+	for other_record in _scope_open:
+		if int(other_record.get("group", -1)) != group:
+			continue
+		other_record["formula"] = new_formula
+		var other_window = other_record.get("window")
+		if other_window != null and is_instance_valid(other_window) and other_window.has_method("set_assumption_formula"):
+			other_window.set_assumption_formula(new_formula)
+		var other_item = other_record.get("premise_item")
+		if other_item != null and is_instance_valid(other_item) and other_item.has_method("set_assumption_formula"):
+			other_item.set_assumption_formula(new_formula)
+	_refresh_all_canvases()
+	refresh_machine()
+	_queue_palette_clearance()
 
 func _close_formula_builder(play_cancel: bool = false) -> void:
 	if play_cancel and _formula_builder != null:
@@ -502,6 +579,7 @@ func _close_formula_builder(play_cancel: bool = false) -> void:
 		_formula_builder.queue_free()
 	_formula_builder = null
 	_formula_builder_target = null
+	_formula_builder_scope_record = null
 	_formula_builder_action = ""
 
 ## Atoms used by the current level, offered as builder tiles.
@@ -2028,6 +2106,8 @@ func _on_undo() -> void:
 	_suppress_rule_feedback = true
 	if str(entry.get("kind", "")) == "scope_open":
 		_undo_scope_open(entry)
+	elif str(entry.get("kind", "")) == "assumption_edit":
+		_apply_assumption_formula(entry.get("record"), entry.get("old_formula"))
 	else:
 		_undo_board_snapshot(entry)
 	_pending_rule_feedback = 0

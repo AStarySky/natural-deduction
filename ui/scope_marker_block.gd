@@ -73,6 +73,10 @@ func get_rule_id() -> String:
 func get_assumption_group() -> int:
 	return assumption_group
 
+func set_assumption_formula(new_formula) -> void:
+	assumption_formula = new_formula
+	refresh()
+
 func get_scope_assumption_formula():
 	return assumption_formula
 

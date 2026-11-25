@@ -215,6 +215,12 @@ func _build() -> void:
 
 	_refresh_preview()
 
+## Used when editing an existing assumption; the user can continue typing
+## or clear the field before submitting.
+func set_initial_text(text: String) -> void:
+	_input_text = text
+	_refresh_preview()
+
 func _section_caption(text: String) -> Label:
 	return UiStyle.make_display_label(text, 12, UiStyle.muted_text())
 
