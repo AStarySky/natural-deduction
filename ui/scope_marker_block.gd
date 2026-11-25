@@ -37,12 +37,13 @@ func _customize_open_button() -> void:
 	if _header != null:
 		_header.add_theme_constant_override("separation", 4)
 		_header.add_child(_open_button)
+	_apply_mode_geometry()
+	if _header != null:
 		_header.visible = true
 	if _corner_badge != null:
-		_corner_badge.visible = false
+		_corner_badge.visible = true
 	if _badge != null:
-		_badge.visible = true
-	_apply_mode_geometry()
+		_badge.visible = false
 	refresh_visuals()
 
 func apply_card_size_mode(mode: String) -> void:
@@ -50,9 +51,9 @@ func apply_card_size_mode(mode: String) -> void:
 	if _header != null:
 		_header.visible = true
 	if _corner_badge != null:
-		_corner_badge.visible = false
+		_corner_badge.visible = true
 	if _badge != null:
-		_badge.visible = true
+		_badge.visible = false
 	update_minimum_size()
 	reset_size()
 
@@ -121,9 +122,9 @@ func refresh() -> void:
 	if _header != null:
 		_header.visible = true
 	if _badge != null:
-		_badge.visible = true
+		_badge.visible = false
 	if _corner_badge != null:
-		_corner_badge.visible = false
+		_corner_badge.visible = true
 	refresh_visuals()
 
 func refresh_visuals() -> void:

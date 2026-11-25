@@ -30,8 +30,8 @@ static func formula_block(mode: String) -> Dictionary:
 			"show_header": true,
 		}
 	return {
-		"min_size": Vector2(56, 68),
-		"margin_side": 9.0,
+		"min_size": Vector2(74, 68),
+		"margin_side": 18.0,
 		"margin_top": 8.0,
 		"separation": 2,
 		"badge_size": 8.0,
@@ -90,8 +90,8 @@ static func palette_formula(mode: String) -> Dictionary:
 			"show_header": true,
 		}
 	return {
-		"min_size": Vector2(64, 64),
-		"margin_side": 8.0,
+		"min_size": Vector2(66, 64),
+		"margin_side": 16.0,
 		"margin_top": 6.0,
 		"separation": 2,
 		"badge_size": 8.0,
@@ -106,7 +106,7 @@ static func palette_formula(mode: String) -> Dictionary:
 static func palette_assumption(mode: String) -> Dictionary:
 	var metrics := palette_formula(mode)
 	if normalize(mode) == COMPACT:
-		metrics["min_size"] = Vector2(64, 68)
+		metrics["min_size"] = Vector2(66, 68)
 		metrics["tag_font_size"] = 8
 		metrics["header_separation"] = 2
 	else:

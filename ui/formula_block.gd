@@ -109,9 +109,16 @@ func _apply_mode_geometry() -> void:
 			float(metrics["badge_size"]),
 			float(metrics["badge_size"])
 		)
-		var inset: float = float(metrics["corner_inset"])
-		_corner_badge.position = Vector2(inset, inset)
-		_corner_badge.size = Vector2(float(metrics["badge_size"]), float(metrics["badge_size"]))
+		var badge_size: float = float(metrics["badge_size"])
+		# The overlay lives inside the panel's content margins. Place the dot's
+		# centre on the rounded corner's arc centre (radius 12), not at the
+		# content origin.
+		var arc_center := Vector2(12.0, 12.0)
+		_corner_badge.position = (
+			arc_center - Vector2(badge_size, badge_size) * 0.5
+			- Vector2(float(metrics["margin_side"]), float(metrics["margin_top"]))
+		)
+		_corner_badge.size = Vector2(badge_size, badge_size)
 	if _badge != null:
 		_badge.custom_minimum_size = Vector2(
 			float(metrics["badge_size"]),
