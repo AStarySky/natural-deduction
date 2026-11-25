@@ -178,7 +178,7 @@ func setup(p_rule_id: String, p_controller) -> void:
 	_corner_copy.offset_left = -36.0
 	_corner_copy.offset_top = 6.0
 	_corner_copy.offset_right = -6.0
-	_corner_copy.offset_bottom = 32.0
+	_corner_copy.offset_bottom = 36.0
 	_overlay.add_child(_corner_copy)
 	_apply_mode_geometry()
 
@@ -265,7 +265,7 @@ func _apply_mode_geometry() -> void:
 		_corner_copy.offset_left = -36.0
 		_corner_copy.offset_top = 0.0
 		_corner_copy.offset_right = -6.0
-		_corner_copy.offset_bottom = 26.0
+		_corner_copy.offset_bottom = 30.0
 	if _corner_warning != null:
 		_corner_warning.visible = compact and state == State.ERROR
 		_corner_warning.position = Vector2(6.0, 32.0 if _is_switchable() else 0.0)

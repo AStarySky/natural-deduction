@@ -104,9 +104,9 @@ func _run() -> void:
 	_check(block_box.shadow_size == 0, "block controls are flat")
 	_check(block_box.content_margin_left == 4.0, "block controls use horizontal padding 4")
 	_check(
-		rule_card._copy_button.custom_minimum_size == Vector2(30, 26)
+		rule_card._copy_button.custom_minimum_size == Vector2(30, 30)
 		and rule_card._copy_button.block_variant,
-		"rule copy is a 30x26 block control"
+		"rule copy is a 30x30 block control"
 	)
 	var copy_plate: StyleBoxFlat = rule_card._copy_button._plate_style(UiStyle.cream())
 	_check(

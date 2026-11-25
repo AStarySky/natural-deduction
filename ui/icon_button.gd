@@ -18,11 +18,7 @@ func setup(p_kind: String, tip: String, block_variant_enabled: bool = false) -> 
 	block_variant = block_variant_enabled
 	add_to_group("nd_icon_button")
 	tooltip_text = tip
-	custom_minimum_size = (
-		Vector2(30, UiStyle.BLOCK_CONTROL_HEIGHT)
-		if block_variant
-		else Vector2(30, 30)
-	)
+	custom_minimum_size = Vector2(30, 30)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	mouse_entered.connect(_on_hover.bind(true))
