@@ -44,6 +44,8 @@ func setup(p_formula: FormulaRes) -> void:
 
 	_badge = Panel.new()
 	_badge.custom_minimum_size = Vector2(metrics["badge_size"], metrics["badge_size"])
+	_badge.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_header.add_child(_badge)
 	var spacer := Control.new()

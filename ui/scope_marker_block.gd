@@ -11,7 +11,6 @@ var conclusion_block = null
 var window_record = null
 
 var _open_button: Button = null
-var _content_margin: MarginContainer = null
 
 func setup_marker(formula: FormulaRes, group: int, p_controller, tint: Color = Color8(226, 211, 248)) -> void:
 	assumption_formula = formula
@@ -23,38 +22,39 @@ func setup_marker(formula: FormulaRes, group: int, p_controller, tint: Color = C
 	# narrow right gutter for the OPEN button.
 	setup(formula)
 	_card_fill = scope_color
-	_accent_fill = scope_color
+	_accent_fill = scope_color.darkened(0.34)
 	_customize_open_button()
 
 func _customize_open_button() -> void:
-	# FormulaBlock puts its content directly under the panel; wrap the VBox so
-	# the right gutter can never sit on top of the formula.
-	if _vbox != null and _vbox.get_parent() == self:
-		remove_child(_vbox)
-		_content_margin = MarginContainer.new()
-		_content_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_content_margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		_content_margin.add_theme_constant_override("margin_right", 52)
-		add_child(_content_margin)
-		_content_margin.add_child(_vbox)
-		_vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		if _overlay != null:
-			move_child(_overlay, get_child_count() - 1)
-
+	# Keep the formula and tab centred. The OPEN button lives in the same
+	# header row as the status dot, so no right gutter can unbalance the card.
 	_open_button = Button.new()
 	_open_button.text = "OPEN"
 	_open_button.custom_minimum_size = Vector2(44, 20)
 	_open_button.tooltip_text = "Reopen this assumption window."
 	UiStyle.style_button(_open_button, scope_color, 9)
 	_open_button.pressed.connect(_on_open)
-	_open_button.anchor_left = 1.0
-	_open_button.anchor_right = 1.0
-	_open_button.offset_left = -50.0
-	_open_button.offset_top = 6.0
-	_open_button.offset_right = -6.0
-	_open_button.offset_bottom = 26.0
-	_overlay.add_child(_open_button)
+	if _header != null:
+		_header.add_theme_constant_override("separation", 4)
+		_header.add_child(_open_button)
+		_header.visible = true
+	if _corner_badge != null:
+		_corner_badge.visible = false
+	if _badge != null:
+		_badge.visible = true
+	_apply_mode_geometry()
 	refresh_visuals()
+
+func apply_card_size_mode(mode: String) -> void:
+	super.apply_card_size_mode(mode)
+	if _header != null:
+		_header.visible = true
+	if _corner_badge != null:
+		_corner_badge.visible = false
+	if _badge != null:
+		_badge.visible = true
+	update_minimum_size()
+	reset_size()
 
 func _on_open() -> void:
 	if controller != null and controller.has_method("open_scope_marker"):
@@ -117,6 +117,13 @@ func refresh() -> void:
 			)
 	if _visual != null:
 		_visual.set_formula(formula)
+	_apply_mode_geometry()
+	if _header != null:
+		_header.visible = true
+	if _badge != null:
+		_badge.visible = true
+	if _corner_badge != null:
+		_corner_badge.visible = false
 	refresh_visuals()
 
 func refresh_visuals() -> void:
