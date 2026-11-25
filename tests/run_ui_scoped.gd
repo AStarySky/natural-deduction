@@ -537,6 +537,11 @@ func _run() -> void:
 		"nested windows yield A -> (B -> A)"
 	)
 	_check(ProofAdapterRes.validate(nested_marker, _f("A -> (B -> A)")).ok, "nested window proof validates")
+	_check(nested_marker._open_button != null, "minimized Assume marker has OPEN")
+	_check(
+		nested_marker._open_button.get_global_rect().size.x > 20.0,
+		"minimized Assume marker OPEN button is visible"
+	)
 	var marker_copy = main.duplicate_block(nested_marker)
 	_check(
 		marker_copy != null

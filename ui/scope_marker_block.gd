@@ -1,67 +1,60 @@
-extends "res://ui/block_base.gd"
+extends "res://ui/formula_block.gd"
 
 ## Compact marker left on the parent canvas after an assumption window is closed.
-## It represents A -> conclusion and can be opened again or plugged into rules.
-
-const FormulaRes = preload("res://logic/formula.gd")
-const FormulaVisualRes = preload("res://ui/formula_visual.gd")
+## It uses the same card chrome as a formula leaf, with a small OPEN corner
+## button for reopening the sub-canvas.
 
 var assumption_formula: FormulaRes = null
 var assumption_group: int = 0
 var scope_color: Color = Color8(226, 211, 248)
 var conclusion_block = null
-var result_formula: FormulaRes = null
 var window_record = null
 
-var _result_visual = null
 var _open_button: Button = null
-var _assumption_label: Label = null
+var _content_margin: MarginContainer = null
 
 func setup_marker(formula: FormulaRes, group: int, p_controller, tint: Color = Color8(226, 211, 248)) -> void:
 	assumption_formula = formula
 	assumption_group = group
 	scope_color = tint
 	controller = p_controller
-	custom_minimum_size = Vector2(168, 82)
-	size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	add_theme_stylebox_override(
-		"panel",
-		UiStyle.card_style(tint, UiStyle.border_color(), 12)
-	)
 
-	var box := VBoxContainer.new()
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	box.add_theme_constant_override("separation", 3)
-	add_child(box)
+	# Build the normal formula-leaf chrome first, then tint it and reserve a
+	# narrow right gutter for the OPEN button.
+	setup(formula)
+	_card_fill = scope_color
+	_accent_fill = scope_color
+	_customize_open_button()
 
-	var header := HBoxContainer.new()
-	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	header.add_theme_constant_override("separation", 4)
-	box.add_child(header)
-	_assumption_label = UiStyle.make_display_label(
-		"Assume [" + assumption_formula.to_display_string() + "]",
-		10,
-		UiStyle.muted_text()
-	)
-	_assumption_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_assumption_label.clip_text = true
-	_assumption_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	_assumption_label.tooltip_text = "Assume " + assumption_formula.to_display_string()
-	header.add_child(_assumption_label)
+func _customize_open_button() -> void:
+	# FormulaBlock puts its content directly under the panel; wrap the VBox so
+	# the right gutter can never sit on top of the formula.
+	if _vbox != null and _vbox.get_parent() == self:
+		remove_child(_vbox)
+		_content_margin = MarginContainer.new()
+		_content_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_content_margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_content_margin.add_theme_constant_override("margin_right", 52)
+		add_child(_content_margin)
+		_content_margin.add_child(_vbox)
+		_vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		if _overlay != null:
+			move_child(_overlay, get_child_count() - 1)
+
 	_open_button = Button.new()
 	_open_button.text = "OPEN"
-	_open_button.custom_minimum_size = Vector2(46, 20)
-	UiStyle.style_button(_open_button, tint, 9)
+	_open_button.custom_minimum_size = Vector2(44, 20)
+	_open_button.tooltip_text = "Reopen this assumption window."
+	UiStyle.style_button(_open_button, scope_color, 9)
 	_open_button.pressed.connect(_on_open)
-	header.add_child(_open_button)
-
-	_result_visual = FormulaVisualRes.new()
-	_result_visual.setup(null, 20, 11)
-	_result_visual.custom_minimum_size = Vector2(0, 30)
-	_result_visual.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_result_visual.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_result_visual.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_child(_result_visual)
+	_open_button.anchor_left = 1.0
+	_open_button.anchor_right = 1.0
+	_open_button.offset_left = -50.0
+	_open_button.offset_top = 6.0
+	_open_button.offset_right = -6.0
+	_open_button.offset_bottom = 26.0
+	_overlay.add_child(_open_button)
+	refresh_visuals()
 
 func _on_open() -> void:
 	if controller != null and controller.has_method("open_scope_marker"):
@@ -93,12 +86,9 @@ func set_conclusion(block) -> void:
 	refresh_bottom_pin()
 	refresh()
 
-func get_result_formula():
-	return result_formula
-
 func get_display_text() -> String:
-	if result_formula != null:
-		return "assume %s => %s" % [assumption_formula.to_display_string(), result_formula.to_display_string()]
+	if formula != null:
+		return "assume %s => %s" % [assumption_formula.to_display_string(), formula.to_display_string()]
 	return "assume " + assumption_formula.to_display_string()
 
 func get_free_assumptions() -> Array:
@@ -114,27 +104,30 @@ func get_free_assumptions() -> Array:
 	return result
 
 func refresh() -> void:
-	result_formula = null
+	formula = null
 	if conclusion_block != null and is_instance_valid(conclusion_block):
 		conclusion_block.refresh()
 		var consequent = conclusion_block.get_result_formula()
 		if consequent != null:
-			result_formula = FormulaRes.new(
+			formula = FormulaRes.new(
 				FormulaRes.Kind.IMPLIES,
 				"",
 				assumption_formula,
 				consequent
 			)
+	if _visual != null:
+		_visual.set_formula(formula)
 	refresh_visuals()
 
 func refresh_visuals() -> void:
-	if _assumption_label != null and assumption_formula != null:
-		_assumption_label.text = "Assume [" + assumption_formula.to_display_string() + "]"
-		_assumption_label.tooltip_text = "Assume " + assumption_formula.to_display_string()
-	if _result_visual != null:
-		_result_visual.set_formula(result_formula)
-		_result_visual.tooltip_text = (
-			result_formula.to_display_string() if result_formula != null else "open the assumption window"
+	if _card_fill != scope_color:
+		_card_fill = scope_color
+		_accent_fill = scope_color
+	super.refresh_visuals()
+	if _open_button != null:
+		_open_button.tooltip_text = (
+			"Reopen this assumption window.\nAssume "
+			+ assumption_formula.to_display_string()
 		)
 	tooltip_text = (
 		"Assume " + assumption_formula.to_display_string()
