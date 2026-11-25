@@ -58,11 +58,10 @@ func _run() -> void:
 	var assumption = main.create_assumption_block(_f("A"))
 	main._base_canvas.add_child(assumption)
 	assumption.reset_size()
-	_check(assumption.custom_minimum_size == Vector2(96, 68), "compact AssumptionBlock min size")
+	_check(assumption.custom_minimum_size == Vector2(56, 68), "compact AssumptionBlock matches FormulaBlock size")
 	_check(not assumption._header.visible, "compact assumption header hidden")
-	_check(assumption._corner_copy.visible, "compact assumption copy visible")
-	_check(assumption._corner_tag.visible, "compact assumption tag visible")
-	_check(assumption._visual._token_size == 22, "compact assumption formula metrics")
+	_check(assumption._corner_badge.visible, "compact assumption badge visible")
+	_check(assumption._visual._token_size == 28, "compact assumption formula metrics match")
 
 	var premise = PaletteItemRes.new()
 	premise.controller = main
@@ -91,7 +90,7 @@ func _run() -> void:
 	_check(chip.custom_minimum_size == Vector2(64, 104), "comfort FormulaBlock min size")
 	_check(chip._visual._token_size == 34 and chip._visual._font_size == 17, "comfort formula metrics")
 	_check(chip._header.visible and not chip._corner_badge.visible, "comfort formula header restored")
-	_check(assumption.custom_minimum_size == Vector2(104, 92), "comfort AssumptionBlock min size")
+	_check(assumption.custom_minimum_size == Vector2(64, 104), "comfort AssumptionBlock matches FormulaBlock size")
 	_check(premise.custom_minimum_size == Vector2(80, 84), "comfort premise tile min size")
 	_check(rule_card._header.visible and not rule_card._overlay.visible, "comfort rule header restored")
 	_check(rule_card.size.y > compact_rule_h, "comfort rule card is taller")
@@ -99,7 +98,7 @@ func _run() -> void:
 	main.set_card_size_mode(CardMetrics.COMPACT)
 	await process_frame
 	_check(chip.custom_minimum_size == Vector2(56, 68), "round-trip returns to compact formula")
-	_check(assumption.custom_minimum_size == Vector2(96, 68), "round-trip returns to compact assumption")
+	_check(assumption.custom_minimum_size == Vector2(56, 68), "round-trip returns to compact assumption")
 	_check(premise.custom_minimum_size == Vector2(64, 64), "round-trip returns to compact premise")
 
 	var switch_card = main.create_rule_block("and_elim_left")

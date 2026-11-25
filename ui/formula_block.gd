@@ -16,6 +16,8 @@ var _corner_badge: Panel = null
 var _tab: ColorRect = null
 var _overlay: Control = null
 var _mode := CardMetrics.DEFAULT
+var _card_fill: Color = UiStyle.cream()
+var _accent_fill: Color = UiStyle.accent()
 
 func setup(p_formula: FormulaRes) -> void:
 	formula = p_formula
@@ -144,7 +146,7 @@ func refresh_visuals() -> void:
 		border = UiStyle.error_color()
 	add_theme_stylebox_override(
 		"panel",
-		CardMetrics.formula_card_style(UiStyle.cream(), border, _mode)
+		CardMetrics.formula_card_style(_card_fill, border, _mode)
 	)
 	for badge in [_badge, _corner_badge]:
 		if badge == null:
@@ -152,7 +154,7 @@ func refresh_visuals() -> void:
 		badge.add_theme_stylebox_override(
 			"panel",
 			UiStyle.panel_style(
-				UiStyle.accent(),
+				_accent_fill,
 				UiStyle.border_color(),
 				int(metrics["badge_radius"]),
 				2,
@@ -160,4 +162,4 @@ func refresh_visuals() -> void:
 			)
 		)
 	if _tab != null:
-		_tab.color = UiStyle.valid_color() if is_goal_linked() else UiStyle.accent()
+		_tab.color = UiStyle.valid_color() if is_goal_linked() else _accent_fill

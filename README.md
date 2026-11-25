@@ -191,7 +191,7 @@ $GODOT --headless --path . -s res://tests/run_title_idle.gd     # 标题页/弹�
 | `run_progress` | 40 | 0 |
 | `run_ui_model` | 103 | 0 |
 | `run_ui_contracts` | 966 | 0 |
-| `run_ui_layout` | 33 | 0 |
+| `run_ui_layout` | 32 | 0 |
 | `run_scope_limits` | 23 | 0 |
 | `run_ui_scoped` | 195 | 0 |
 | `run_chapter_ui` | 43 | 0 |
