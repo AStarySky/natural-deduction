@@ -10,6 +10,7 @@ var scope_color: Color = Color8(226, 211, 248)
 var conclusion_block = null
 var window_record = null
 
+var _edit_button: Button = null
 var _open_button: Button = null
 
 func setup_marker(formula: FormulaRes, group: int, p_controller, tint: Color = Color8(226, 211, 248)) -> void:
@@ -26,8 +27,18 @@ func setup_marker(formula: FormulaRes, group: int, p_controller, tint: Color = C
 	_customize_open_button()
 
 func _customize_open_button() -> void:
-	# Keep the formula and tab centred. The OPEN button lives in the same
-	# header row as the status dot, so no right gutter can unbalance the card.
+	# Keep the formula and tab centred. EDIT and OPEN share the header row
+	# with the status dot, so no right gutter can unbalance the card.
+	if _header != null:
+		_header.add_theme_constant_override("separation", 4)
+	_edit_button = Button.new()
+	_edit_button.text = "EDIT"
+	_edit_button.custom_minimum_size = Vector2(52, UiStyle.BLOCK_CONTROL_HEIGHT)
+	_edit_button.tooltip_text = "Edit this assumption and all of its copies."
+	UiStyle.style_block_button(_edit_button, scope_color, 14)
+	_edit_button.pressed.connect(_on_edit)
+	if _header != null:
+		_header.add_child(_edit_button)
 	_open_button = Button.new()
 	_open_button.text = "OPEN"
 	_open_button.custom_minimum_size = Vector2(52, UiStyle.BLOCK_CONTROL_HEIGHT)
@@ -35,7 +46,6 @@ func _customize_open_button() -> void:
 	UiStyle.style_block_button(_open_button, scope_color, 14)
 	_open_button.pressed.connect(_on_open)
 	if _header != null:
-		_header.add_theme_constant_override("separation", 4)
 		_header.add_child(_open_button)
 	_apply_mode_geometry()
 	if _header != null:
@@ -56,6 +66,10 @@ func apply_card_size_mode(mode: String) -> void:
 		_badge.visible = false
 	update_minimum_size()
 	reset_size()
+
+func _on_edit() -> void:
+	if controller != null and controller.has_method("edit_scope_marker"):
+		controller.edit_scope_marker(self)
 
 func _on_open() -> void:
 	if controller != null and controller.has_method("open_scope_marker"):

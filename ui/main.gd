@@ -455,11 +455,20 @@ func open_assumption_builder() -> void:
 	_formula_builder_action = "assumption"
 	_open_formula_builder_modal()
 
-## Edit the hypothesis behind a maximized Assume window and all of its copies.
+## Edit the hypothesis behind an Assume window or its minimized marker.
 func edit_scope_assumption(window) -> void:
 	if window == null or not is_instance_valid(window):
 		return
-	var record = window.scope_record
+	_begin_assumption_edit(window.scope_record)
+
+func edit_scope_marker(marker) -> void:
+	if marker == null or not is_instance_valid(marker):
+		return
+	if not marker.has_method("get_window_record"):
+		return
+	_begin_assumption_edit(marker.get_window_record())
+
+func _begin_assumption_edit(record) -> void:
 	if record == null:
 		return
 	if _game_page == null or not _game_page.visible or _formula_builder != null:

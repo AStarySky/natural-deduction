@@ -560,6 +560,11 @@ func _run() -> void:
 		nested_marker._open_button.get_global_rect().size.x > 20.0,
 		"minimized Assume marker OPEN button is visible"
 	)
+	_check(nested_marker._edit_button != null, "minimized Assume marker has EDIT")
+	_check(
+		nested_marker._edit_button.get_global_rect().size.x > 20.0,
+		"minimized Assume marker EDIT button is visible"
+	)
 	var marker_copy = main.duplicate_block(nested_marker)
 	_check(
 		marker_copy != null
@@ -1218,13 +1223,7 @@ func _run() -> void:
 		"invalid-edit setup derives A & B -> A"
 	)
 	if invalid_marker != null:
-		main.open_scope_marker(invalid_marker)
-		await process_frame
-		var reopened_record = main._scope_open[-1]
-		main.maximize_scope_window(reopened_record["window"])
-		await process_frame
-		await process_frame
-		reopened_record["window"]._edit_button.pressed.emit()
+		invalid_marker._edit_button.pressed.emit()
 		await process_frame
 		if main._formula_builder != null:
 			main._formula_builder._input_text = "P"
