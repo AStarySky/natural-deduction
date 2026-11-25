@@ -93,13 +93,16 @@ func apply_card_size_mode(mode: String) -> void:
 
 func _apply_mode_geometry() -> void:
 	var metrics := CardMetrics.formula_block(_mode)
+	var atom := formula != null and formula.kind == FormulaRes.Kind.ATOM
 	custom_minimum_size = metrics["min_size"]
 	if _vbox != null:
 		_vbox.add_theme_constant_override("separation", int(metrics["separation"]))
 	if _header != null:
-		_header.visible = bool(metrics["show_header"])
+		_header.visible = bool(metrics["show_header"]) and not atom
+	if _badge != null:
+		_badge.visible = not atom
 	if _corner_badge != null:
-		_corner_badge.visible = not bool(metrics["show_header"])
+		_corner_badge.visible = (not bool(metrics["show_header"])) and not atom
 		_corner_badge.custom_minimum_size = Vector2(
 			float(metrics["badge_size"]),
 			float(metrics["badge_size"])

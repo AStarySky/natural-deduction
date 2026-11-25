@@ -322,8 +322,11 @@ func _apply_formula_geometry() -> void:
 	custom_minimum_size = metrics["min_size"]
 	if _box != null:
 		_box.add_theme_constant_override("separation", int(metrics["separation"]))
+	var atom := formula != null and formula.kind == FormulaRes.Kind.ATOM
 	if _header != null:
-		_header.visible = bool(metrics["show_header"])
+		_header.visible = bool(metrics["show_header"]) and not atom
+	if _formula_badge != null:
+		_formula_badge.visible = not atom
 	if _margin != null:
 		var side := int(metrics["margin_side"])
 		var top := int(metrics["margin_top"])
@@ -335,7 +338,7 @@ func _apply_formula_geometry() -> void:
 	if _formula_badge != null:
 		_formula_badge.custom_minimum_size = Vector2(float(metrics["badge_size"]), float(metrics["badge_size"]))
 	if _corner_badge != null:
-		_corner_badge.visible = compact
+		_corner_badge.visible = compact and not atom
 		_corner_badge.custom_minimum_size = Vector2(float(metrics["badge_size"]), float(metrics["badge_size"]))
 		_corner_badge.position = Vector2(float(metrics["corner_inset"]), float(metrics["corner_inset"]))
 		_corner_badge.size = Vector2(float(metrics["badge_size"]), float(metrics["badge_size"]))
